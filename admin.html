@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Panel</title>
+
+<style>
+body { font-family: Arial; background:#f5f5f5; padding:20px; }
+.container { max-width:900px; margin:auto; background:white; padding:20px; }
+input { padding:8px; margin-bottom:10px; width:200px; }
+table { width:100%; border-collapse:collapse; }
+td,th { padding:8px; border-bottom:1px solid #ddd; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Admin Panel</h2>
+
+<div id="login">
+<input type="password" id="pass" placeholder="Password">
+<button onclick="login()">Login</button>
+</div>
+
+<div id="panel" style="display:none;">
+
+<input type="text" id="search" placeholder="Search...">
+<button onclick="exportCSV()">Export CSV</button>
+
+<p id="stats"></p>
+
+<table id="table">
+<thead>
+<tr>
+<th>RefNo</th>
+<th>Name</th>
+<th>Mobile</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+const URL = "https://script.google.com/macros/s/AKfycbwqfUXVoO6O0TVEDyLSbYMcvARhwAu6RtSbXWJ2I0Yb3WQp9RAiE9-grx2EHiZeY8pCgQ/exec";
+
+function login(){
+const pass = document.getElementById("pass").value;
+
+fetch(URL+"?password="+pass)
+.then(res=>res.json())
+.then(data=>{
+
+if(data.error){
+alert("Wrong password");
+return;
+}
+
+document.getElementById("login").style.display="none";
+document.getElementById("panel").style.display="block";
+
+render(data);
+
+});
+}
+
+function render(data){
+
+const tbody = document.querySelector("tbody");
+tbody.innerHTML="";
+
+let today = new Date().toISOString().split('T')[0];
+let todayCount = 0;
+
+data.forEach(r=>{
+
+if(r.RegistrationDate===today) todayCount++;
+
+tbody.innerHTML+=`
+<tr>
+<td>${r.RefNo}</td>
+<td>${r.Name}</td>
+<td>${r.Mobile}</td>
+<td>${r.RegistrationDate}</td>
+</tr>
+`;
+
+});
+
+document.getElementById("stats").innerHTML =
+`Total: ${data.length} | Today: ${todayCount}`;
+
+}
+
+document.addEventListener("input",(e)=>{
+if(e.target.id==="search"){
+const val = e.target.value.toLowerCase();
+document.querySelectorAll("tbody tr").forEach(row=>{
+row.style.display =
+row.innerText.toLowerCase().includes(val) ? "" : "none";
+});
+}
+});
+
+function exportCSV(){
+let csv = [];
+document.querySelectorAll("table tr").forEach(row=>{
+let cols = row.querySelectorAll("td,th");
+let arr = [];
+cols.forEach(c=>arr.push(c.innerText));
+csv.push(arr.join(","));
+});
+
+const blob = new Blob([csv.join("\n")]);
+const a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "participants.csv";
+a.click();
+}
+
+</script>
+
+</body>
+</html>

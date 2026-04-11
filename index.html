@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bible Reading Registration</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin:0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg,#f5efe6,#e8dccb);
+}
+
+.container {
+  max-width:500px;
+  margin:50px auto;
+  padding:20px;
+}
+
+.card {
+  background:white;
+  border-radius:20px;
+  padding:30px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.15);
+  text-align:center;
+}
+
+h1 {
+  font-family:'Playfair Display', serif;
+  color:#7a4c2c;
+  margin-bottom:5px;
+}
+
+.subtitle {
+  font-size:14px;
+  color:#8b6b4c;
+  margin-bottom:20px;
+}
+
+input {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:12px;
+  border:1px solid #ddd;
+  font-size:15px;
+}
+
+input:focus {
+  outline:none;
+  border-color:#7a4c2c;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  margin-top:15px;
+  border:none;
+  border-radius:30px;
+  background:#7a4c2c;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover {
+  background:#9b623c;
+}
+
+.success {
+  background:#e8f5e9;
+  padding:15px;
+  border-radius:12px;
+  margin-top:15px;
+  text-align:left;
+}
+
+.error {
+  background:#ffe0e0;
+  padding:15px;
+  border-radius:12px;
+  margin-top:15px;
+}
+
+.footer {
+  margin-top:20px;
+  font-size:12px;
+  color:#8b6b4c;
+}
+
+.icon {
+  font-size:40px;
+  margin-bottom:10px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+
+    <div class="icon">📖</div>
+
+    <h1>Bible Study</h1>
+    <div class="subtitle">Registration Form</div>
+
+    <form id="form">
+      <input type="text" id="name" placeholder="Full Name" required>
+      <input type="text" id="mobile" placeholder="Mobile Number" required>
+
+      <input type="text" id="date" readonly>
+
+      <button type="submit">Register Now</button>
+    </form>
+
+    <div id="msg"></div>
+
+    <div class="footer">
+      “For where two or three gather in my name, there am I with them.” – Matthew 18:20
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<script>
+const URL = "https://script.google.com/macros/s/AKfycbwqfUXVoO6O0TVEDyLSbYMcvARhwAu6RtSbXWJ2I0Yb3WQp9RAiE9-grx2EHiZeY8pCgQ/exec";
+
+// Auto date
+document.getElementById("date").value =
+new Date().toISOString().split('T')[0];
+
+document.getElementById("form").addEventListener("submit", async (e)=>{
+e.preventDefault();
+
+const name = document.getElementById("name").value;
+const mobile = document.getElementById("mobile").value;
+const date = document.getElementById("date").value;
+
+const msg = document.getElementById("msg");
+
+msg.innerHTML = "⏳ Submitting...";
+
+try{
+const res = await fetch(URL,{
+method:"POST",
+body:JSON.stringify({
+action:"register",
+name,
+mobile,
+registrationDate:date
+})
+});
+
+const data = await res.json();
+
+if(data.status==="success"){
+msg.innerHTML = `
+<div class="success">
+<strong>✅ Successfully Registered</strong><br><br>
+RefNo: ${data.refno}<br>
+Name: ${name}<br>
+Mobile: ${mobile}
+
+<br><br>
+<canvas id="qr"></canvas><br><br>
+
+<button onclick="printSlip('${data.refno}','${name}','${mobile}')">
+🖨 Print Slip
+</button>
+</div>
+`;
+
+QRCode.toCanvas(document.getElementById('qr'),
+`Ref:${data.refno} Name:${name} Mobile:${mobile}`);
+
+}else{
+msg.innerHTML = `<div class="error">${data.message}</div>`;
+}
+
+}catch(err){
+msg.innerHTML = `<div class="error">Connection error. Please try again.</div>`;
+}
+
+});
+
+function printSlip(ref,name,mobile){
+const w = window.open('');
+w.document.write(`
+<h2>Bible Study Registration</h2>
+<p>RefNo: ${ref}</p>
+<p>Name: ${name}</p>
+<p>Mobile: ${mobile}</p>
+`);
+w.print();
+}
+</script>
+
+</body>
+</html>
