@@ -1,287 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bible Reading Registration</title>
+<title>Super Admin Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-  margin:0;
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg,#f5efe6,#e8dccb);
+body { font-family: Arial; background:#f5f5f5; padding:20px; }
+.container { max-width:1200px; margin:auto; background:white; padding:20px; border-radius:10px; }
+
+input,button {
+  padding:8px; margin:5px; border-radius:5px; border:1px solid #ccc;
 }
 
-.container {
-  max-width:500px;
-  margin:50px auto;
-  padding:20px;
+button { cursor:pointer; background:#7a4c2c; color:white; }
+
+.cards {
+  display:flex; gap:10px; margin:15px 0;
 }
 
 .card {
-  background:white;
-  border-radius:20px;
-  padding:30px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.15);
-  text-align:center;
+  flex:1; padding:15px; background:#eee; border-radius:10px;
+  text-align:center; font-weight:bold;
 }
 
-h1 {
-  font-family:'Playfair Display', serif;
-  color:#7a4c2c;
-}
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+td,th { padding:10px; border-bottom:1px solid #ddd; }
 
-.subtitle {
-  font-size:14px;
-  color:#8b6b4c;
-  margin-bottom:20px;
-}
-
-input {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:12px;
-  border:1px solid #ddd;
-}
-
-button {
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border:none;
-  border-radius:30px;
-  background:#7a4c2c;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-button:hover {
-  background:#9b623c;
-}
-
-.success {
-  background:#e8f5e9;
-  padding:15px;
-  margin-top:15px;
-  border-radius:10px;
-  text-align:left;
-}
-
-.error {
-  background:#ffe0e0;
-  padding:15px;
-  margin-top:15px;
-  border-radius:10px;
-}
-
-.footer {
-  margin-top:20px;
-  font-size:12px;
-  color:#8b6b4c;
-}
-
-.admin-link {
-  margin-top:20px;
-  font-size:14px;
-}
-
-.admin-link a {
-  text-decoration:none;
-  color:#7a4c2c;
-  font-weight:bold;
-}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-  <div class="card">
 
-    <h1>📖 Bible Reading</h1>
-    <div class="subtitle">Registration Form</div>
+<h2>📊 Super Admin Dashboard</h2>
 
-    <form id="form">
-      <input type="text" id="name" placeholder="Full Name (e.g. Juan Luna)" required>
-      <input type="text" id="mobile" placeholder="Mobile (e.g. 66695789)" required>
-      <input type="text" id="date" readonly>
-      <button type="submit" id="submitBtn">Register Now</button>
-    </form>
-
-    <div id="msg"></div>
-
-    <!-- 🔐 ADMIN LINK -->
-    <div class="admin-link">
-      <a href="admin.html" target="_blank">🔐 Admin Panel</a>
-    </div>
-
-    <div class="footer">
-      "Man shall not live by bread alone, but by every word that proceeds from the mouth of God." – Matthew 4:4
-    </div>
-
-  </div>
+<div id="login">
+<input type="password" id="pass" placeholder="Password">
+<button onclick="login()">Login</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<div id="panel" style="display:none;">
+
+<!-- FILTERS -->
+<input type="date" id="fromDate">
+<input type="date" id="toDate">
+<input type="text" id="search" placeholder="Search name/mobile">
+
+<button onclick="applyFilter()">Apply Filter</button>
+<button onclick="exportCSV()">Export CSV</button>
+
+<!-- STATS -->
+<div class="cards">
+<div class="card" id="total">Total: 0</div>
+<div class="card" id="today">Today: 0</div>
+<div class="card" id="month">This Month: 0</div>
+</div>
+
+<!-- CHART -->
+<canvas id="chart"></canvas>
+
+<!-- TABLE -->
+<table>
+<thead>
+<tr>
+<th>RefNo</th>
+<th>Name</th>
+<th>Mobile</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+</div>
+
+</div>
 
 <script>
+
 const URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gldzG4u3NA6b7um6rWN5NxgkLNeoJPJzdwWOpOd1s5_9g/exec";
 
-let existingData = [];
+let rawData = [];
+let chart;
 
-// SET DATE
-function setDate(){
-  document.getElementById("date").value =
-  new Date().toISOString().split('T')[0];
-}
-setDate();
+// LOGIN
+function login(){
+fetch(URL+"?password="+document.getElementById("pass").value)
+.then(r=>r.json())
+.then(data=>{
+if(data.error){ alert("Wrong password"); return; }
 
-// LOAD EXISTING DATA
-async function loadData(){
-  try{
-    const res = await fetch(URL + "?password=bible2025");
-    const data = await res.json();
-    existingData = data || [];
-  }catch{}
-}
-loadData();
+document.getElementById("login").style.display="none";
+document.getElementById("panel").style.display="block";
 
-// FORMAT NAME
-function formatName(name){
-  return name.toLowerCase().split(" ").filter(w=>w)
-  .map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+rawData = data;
+applyFilter();
+});
 }
 
-// FORMAT MOBILE
-function formatMobile(mobile){
-  mobile = mobile.replace(/\D/g,'');
-  if(mobile.startsWith("974")) mobile = mobile.slice(3);
-  if(mobile.length !== 8) return null;
-  return "+974" + mobile;
+// FORMAT DATE
+function formatDate(d){
+return new Date(d).toLocaleString();
 }
 
-// DUPLICATE CHECK
-function isDuplicate(name, mobile){
-  return existingData.some(r =>
-    r.Name.toLowerCase().trim() === name.toLowerCase().trim() &&
-    r.Mobile.trim() === mobile.trim()
-  );
-}
+// FILTER
+function applyFilter(){
 
-// SUBMIT
-document.getElementById("form").addEventListener("submit", async (e)=>{
-e.preventDefault();
+let from = document.getElementById("fromDate").value;
+let to = document.getElementById("toDate").value;
+let search = document.getElementById("search").value.toLowerCase();
 
-let name = formatName(document.getElementById("name").value.trim());
-let mobile = formatMobile(document.getElementById("mobile").value.trim());
-const date = document.getElementById("date").value;
+let filtered = rawData.filter(r=>{
 
-const msg = document.getElementById("msg");
-const btn = document.getElementById("submitBtn");
+let matchSearch =
+r.Name.toLowerCase().includes(search) ||
+r.Mobile.includes(search);
 
-// VALIDATION
-if(!mobile){
-  msg.innerHTML = `<div class="error">Invalid Qatar mobile number</div>`;
-  return;
-}
+let date = r.RegistrationDate;
 
-// DUPLICATE CHECK
-if(isDuplicate(name, mobile)){
-  msg.innerHTML = `<div class="error">This person is already registered.</div>`;
-  return;
-}
+let matchDate =
+(!from || date>=from) &&
+(!to || date<=to);
 
-// DISABLE BUTTON
-btn.disabled = true;
-btn.innerText = "Submitting...";
-
-try{
-const res = await fetch(URL,{
-method:"POST",
-body:JSON.stringify({
-action:"register",
-name,
-mobile,
-registrationDate:date
-})
+return matchSearch && matchDate;
 });
 
-const data = await res.json();
-
-if(data.status==="success"){
-
-existingData.push({Name:name, Mobile:mobile});
-
-// 📱 AUTO WHATSAPP OPEN
-window.open(`https://wa.me/${mobile.replace('+','')}?text=${encodeURIComponent(
-`Hello ${name}, you are successfully registered for Bible Reading 🙏\nRefNo: ${data.refno}`
-)}`, "_blank");
-
-msg.innerHTML = `
-<div class="success">
-<strong>✅ Successfully Registered</strong><br><br>
-
-RefNo: ${data.refno}<br>
-Name: ${name}<br>
-Mobile: ${mobile}
-
-<br><br>
-<canvas id="qr"></canvas><br><br>
-
-<button onclick="printSlip('${data.refno}','${name}','${mobile}')">🖨 Print Slip</button>
-<button onclick="resetForm()">🔄 Register New</button>
-<button onclick="exitSystem()">❌ Exit</button>
-</div>
-`;
-
-QRCode.toCanvas(document.getElementById('qr'),
-`Ref:${data.refno} Name:${name} Mobile:${mobile}`);
-
-}else{
-msg.innerHTML = `<div class="error">${data.message}</div>`;
-btn.disabled = false;
-btn.innerText = "Register Now";
+render(filtered);
+updateStats(filtered);
+updateChart(filtered);
 }
 
-}catch{
-msg.innerHTML = `<div class="error">Connection error. Try again.</div>`;
-btn.disabled = false;
-btn.innerText = "Register Now";
+// RENDER TABLE
+function render(data){
+const tbody = document.querySelector("tbody");
+tbody.innerHTML="";
+
+data.forEach(r=>{
+tbody.innerHTML+=`
+<tr>
+<td>${Number(r.RefNo)}</td>
+<td>${r.Name}</td>
+<td>${r.Mobile}</td>
+<td>${formatDate(r.Timestamp)}</td>
+</tr>`;
+});
 }
 
+// STATS
+function updateStats(data){
+
+let today = new Date().toISOString().split('T')[0];
+let month = today.slice(0,7);
+
+let todayCount = data.filter(r=>r.RegistrationDate===today).length;
+let monthCount = data.filter(r=>r.RegistrationDate.startsWith(month)).length;
+
+document.getElementById("total").innerText = "Total: "+data.length;
+document.getElementById("today").innerText = "Today: "+todayCount;
+document.getElementById("month").innerText = "This Month: "+monthCount;
+}
+
+// CHART
+function updateChart(data){
+
+let counts = {};
+
+data.forEach(r=>{
+counts[r.RegistrationDate] = (counts[r.RegistrationDate]||0)+1;
 });
 
-// RESET
-function resetForm(){
-document.getElementById("form").reset();
-document.getElementById("msg").innerHTML="";
-document.getElementById("submitBtn").disabled = false;
-document.getElementById("submitBtn").innerText="Register Now";
-setDate();
+let labels = Object.keys(counts).sort();
+let values = labels.map(k=>counts[k]);
+
+if(chart) chart.destroy();
+
+chart = new Chart(document.getElementById("chart"),{
+type:"line",
+data:{
+labels:labels,
+datasets:[{ label:"Registrations", data:values }]
+}
+});
 }
 
-// EXIT
-function exitSystem(){
-window.open('', '_self');
-window.close();
-window.location.href = "about:blank";
+// EXPORT
+function exportCSV(){
+
+let csv = [["RefNo","Name","Mobile","Date"]];
+
+rawData.forEach(r=>{
+csv.push([
+Number(r.RefNo),
+r.Name,
+r.Mobile,
+formatDate(r.Timestamp)
+]);
+});
+
+let content = csv.map(e=>e.join(",")).join("\n");
+let blob = new Blob(["\uFEFF"+content]);
+
+let a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "analytics.csv";
+a.click();
 }
 
-// PRINT
-function printSlip(ref,name,mobile){
-const w = window.open('');
-w.document.write(`
-<h2>Bible Registration</h2>
-<p>RefNo: ${ref}</p>
-<p>Name: ${name}</p>
-<p>Mobile: ${mobile}</p>
-`);
-w.print();
-}
 </script>
 
 </body>
