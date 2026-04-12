@@ -85,8 +85,7 @@ td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 <script>
 
-// 🔥 IMPORTANT: renamed to avoid conflict
-const API_URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gldzG4u3NA6b7um6rWN5NxgkLNeoJPJzdwWOpOd1s5_9g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwqfUXVoO6O0TVEDyLSbYMcvARhwAu6RtSbXWJ2I0Yb3WQp9RAiE9-grx2EHiZeY8pCgQ/exec";
 
 let rawData = [];
 let filteredData = [];
@@ -104,20 +103,35 @@ document.getElementById("login").style.display="none";
 document.getElementById("panel").style.display="block";
 
 rawData = data;
+
+// DEBUG (optional)
+console.log("DATA:", data);
+
 applyFilter();
 });
 }
 
-// SAFE REFNO
-function safeRef(ref){
-return (!ref || isNaN(ref)) ? "-" : Number(ref);
+// 🔥 UNIVERSAL REFNO
+function getRefNo(r){
+return r.RefNo || r.refno || r.REFNO || "-";
 }
 
-// SAFE DATE
-function formatDate(val){
+// 🔥 UNIVERSAL DATE
+function getDate(r){
+
+let val =
+r.Timestamp ||
+r.timestamp ||
+r.Date ||
+r.date ||
+r.RegistrationDate;
+
 if(!val) return "-";
+
 let d = new Date(val);
+
 if(isNaN(d)) return val;
+
 return d.toLocaleString();
 }
 
@@ -156,10 +170,10 @@ tbody.innerHTML="";
 data.forEach(r=>{
 tbody.innerHTML+=`
 <tr>
-<td>${safeRef(r.RefNo)}</td>
+<td>${getRefNo(r)}</td>
 <td>${r.Name || "-"}</td>
 <td>${r.Mobile || "-"}</td>
-<td>${formatDate(r.Timestamp)}</td>
+<td>${getDate(r)}</td>
 </tr>`;
 });
 }
@@ -226,10 +240,10 @@ let csv = [["RefNo","Name","Mobile","Date"]];
 
 data.forEach(r=>{
 csv.push([
-safeRef(r.RefNo),
+getRefNo(r),
 r.Name || "",
 r.Mobile || "",
-formatDate(r.Timestamp)
+getDate(r)
 ]);
 });
 
@@ -237,7 +251,6 @@ let content = csv.map(e=>e.join(",")).join("\n");
 
 let blob = new Blob(["\uFEFF"+content], { type: "text/csv;charset=utf-8;" });
 
-// ✅ FIXED DOWNLOAD
 let link = document.createElement("a");
 link.href = window.URL.createObjectURL(blob);
 link.download = "bible_participants.csv";
