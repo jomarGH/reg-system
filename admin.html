@@ -28,8 +28,8 @@ table { width:100%; border-collapse:collapse; margin-top:10px; }
 td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 #chart { margin-top:20px; }
-
 </style>
+
 </head>
 
 <body>
@@ -85,15 +85,17 @@ td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 <script>
 
-const URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gldzG4u3NA6b7um6rWN5NxgkLNeoJPJzdwWOpOd1s5_9g/exec";
+// 🔥 IMPORTANT: renamed to avoid conflict
+const API_URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gldzG4u3NA6b7um6rWN5NxgkLNeoJPJzdwWOpOd1s5_9g/exec";
 
 let rawData = [];
+let filteredData = [];
 let chart;
 let analyticsVisible = true;
 
 // LOGIN
 function login(){
-fetch(URL+"?password="+document.getElementById("pass").value)
+fetch(API_URL+"?password="+document.getElementById("pass").value)
 .then(r=>r.json())
 .then(data=>{
 if(data.error){ alert("Wrong password"); return; }
@@ -114,10 +116,8 @@ return (!ref || isNaN(ref)) ? "-" : Number(ref);
 // SAFE DATE
 function formatDate(val){
 if(!val) return "-";
-
 let d = new Date(val);
 if(isNaN(d)) return val;
-
 return d.toLocaleString();
 }
 
@@ -128,7 +128,7 @@ let from = document.getElementById("fromDate").value;
 let to = document.getElementById("toDate").value;
 let search = document.getElementById("search").value.toLowerCase();
 
-let filtered = rawData.filter(r=>{
+filteredData = rawData.filter(r=>{
 
 let matchSearch =
 (r.Name || "").toLowerCase().includes(search) ||
@@ -143,9 +143,9 @@ let matchDate =
 return matchSearch && matchDate;
 });
 
-render(filtered);
-updateStats(filtered);
-updateChart(filtered);
+render(filteredData);
+updateStats(filteredData);
+updateChart(filteredData);
 }
 
 // RENDER TABLE
@@ -213,18 +213,18 @@ tension:0.2
 // TOGGLE ANALYTICS
 function toggleAnalytics(){
 analyticsVisible = !analyticsVisible;
-
 document.getElementById("chart").style.display =
 analyticsVisible ? "block" : "none";
-
 }
 
-// EXPORT CSV (EXCEL SAFE)
+// EXPORT CSV (FULLY FIXED)
 function exportCSV(){
+
+let data = filteredData.length ? filteredData : rawData;
 
 let csv = [["RefNo","Name","Mobile","Date"]];
 
-rawData.forEach(r=>{
+data.forEach(r=>{
 csv.push([
 safeRef(r.RefNo),
 r.Name || "",
@@ -237,10 +237,14 @@ let content = csv.map(e=>e.join(",")).join("\n");
 
 let blob = new Blob(["\uFEFF"+content], { type: "text/csv;charset=utf-8;" });
 
+// ✅ FIXED DOWNLOAD
 let link = document.createElement("a");
-link.href = URL.createObjectURL(blob);
+link.href = window.URL.createObjectURL(blob);
 link.download = "bible_participants.csv";
+
+document.body.appendChild(link);
 link.click();
+document.body.removeChild(link);
 }
 
 </script>
