@@ -85,7 +85,7 @@ td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwqfUXVoO6O0TVEDyLSbYMcvARhwAu6RtSbXWJ2I0Yb3WQp9RAiE9-grx2EHiZeY8pCgQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gldzG4u3NA6b7um6rWN5NxgkLNeoJPJzdwWOpOd1s5_9g/exec";
 
 let rawData = [];
 let filteredData = [];
@@ -103,17 +103,26 @@ document.getElementById("login").style.display="none";
 document.getElementById("panel").style.display="block";
 
 rawData = data;
-
-// DEBUG (optional)
-console.log("DATA:", data);
-
 applyFilter();
 });
 }
 
-// 🔥 UNIVERSAL REFNO
-function getRefNo(r){
-return r.RefNo || r.refno || r.REFNO || "-";
+// 🔥 UNIVERSAL REFNO (FINAL FIX)
+function getRefNo(r, index){
+
+let ref =
+r.RefNo ||
+r.refno ||
+r.REFNO ||
+r["Ref No"] ||
+r["REF NO"] ||
+r["Reference"];
+
+if(!ref || ref === "-"){
+return 26000 + index + 1;
+}
+
+return ref;
 }
 
 // 🔥 UNIVERSAL DATE
@@ -167,10 +176,10 @@ function render(data){
 const tbody = document.querySelector("tbody");
 tbody.innerHTML="";
 
-data.forEach(r=>{
+data.forEach((r,i)=>{
 tbody.innerHTML+=`
 <tr>
-<td>${getRefNo(r)}</td>
+<td>${getRefNo(r,i)}</td>
 <td>${r.Name || "-"}</td>
 <td>${r.Mobile || "-"}</td>
 <td>${getDate(r)}</td>
@@ -231,16 +240,16 @@ document.getElementById("chart").style.display =
 analyticsVisible ? "block" : "none";
 }
 
-// EXPORT CSV (FULLY FIXED)
+// EXPORT CSV (FINAL FIXED)
 function exportCSV(){
 
 let data = filteredData.length ? filteredData : rawData;
 
 let csv = [["RefNo","Name","Mobile","Date"]];
 
-data.forEach(r=>{
+data.forEach((r,i)=>{
 csv.push([
-getRefNo(r),
+getRefNo(r,i),
 r.Name || "",
 r.Mobile || "",
 getDate(r)
