@@ -31,7 +31,6 @@ body {
 h1 {
   font-family:'Playfair Display', serif;
   color:#7a4c2c;
-  margin-bottom:5px;
 }
 
 .subtitle {
@@ -46,26 +45,18 @@ input {
   margin-top:10px;
   border-radius:12px;
   border:1px solid #ddd;
-  font-size:15px;
-}
-
-input:focus {
-  outline:none;
-  border-color:#7a4c2c;
 }
 
 button {
   width:100%;
   padding:12px;
-  margin-top:15px;
+  margin-top:10px;
   border:none;
   border-radius:30px;
   background:#7a4c2c;
   color:white;
-  font-size:16px;
   font-weight:bold;
   cursor:pointer;
-  transition:0.3s;
 }
 
 button:hover {
@@ -75,16 +66,16 @@ button:hover {
 .success {
   background:#e8f5e9;
   padding:15px;
-  border-radius:12px;
   margin-top:15px;
+  border-radius:10px;
   text-align:left;
 }
 
 .error {
   background:#ffe0e0;
   padding:15px;
-  border-radius:12px;
   margin-top:15px;
+  border-radius:10px;
 }
 
 .footer {
@@ -93,11 +84,16 @@ button:hover {
   color:#8b6b4c;
 }
 
-.icon {
-  font-size:40px;
-  margin-bottom:10px;
+.admin-link {
+  margin-top:20px;
+  font-size:14px;
 }
 
+.admin-link a {
+  text-decoration:none;
+  color:#7a4c2c;
+  font-weight:bold;
+}
 </style>
 </head>
 
@@ -106,24 +102,26 @@ button:hover {
 <div class="container">
   <div class="card">
 
-    <div class="icon">📖</div>
-
-    <h1>Bible Reading</h1>
+    <h1>📖 Bible Reading</h1>
     <div class="subtitle">Registration Form</div>
 
     <form id="form">
-      <input type="text" id="name" placeholder="Full Name ex Juan Luna" required>
-      <input type="text" id="mobile" placeholder="Mobile Number ex 66695789" required>
-
+      <input type="text" id="name" placeholder="Full Name (e.g. Juan Luna)" required>
+      <input type="text" id="mobile" placeholder="Mobile (e.g. 66695789)" required>
       <input type="text" id="date" readonly>
-
-      <button type="submit">Register Now</button>
+      <button type="submit" id="submitBtn">Register Now</button>
     </form>
 
     <div id="msg"></div>
 
+    <!-- 🔐 ADMIN LINK -->
+    <div class="admin-link">
+      <a href="admin.html" target="_blank">🔐 Admin Panel</a>
+    </div>
+
     <div class="footer">
       "Man shall not live by bread alone, but by every word that proceeds from the mouth of God." – Matthew 4:4
+    </div>
 
   </div>
 </div>
@@ -131,22 +129,75 @@ button:hover {
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbwqfUXVoO6O0TVEDyLSbYMcvARhwAu6RtSbXWJ2I0Yb3WQp9RAiE9-grx2EHiZeY8pCgQ/exec";
+const URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gldzG4u3NA6b7um6rWN5NxgkLNeoJPJzdwWOpOd1s5_9g/exec";
 
-// Auto date
-document.getElementById("date").value =
-new Date().toISOString().split('T')[0];
+let existingData = [];
 
+// SET DATE
+function setDate(){
+  document.getElementById("date").value =
+  new Date().toISOString().split('T')[0];
+}
+setDate();
+
+// LOAD EXISTING DATA
+async function loadData(){
+  try{
+    const res = await fetch(URL + "?password=bible2025");
+    const data = await res.json();
+    existingData = data || [];
+  }catch{}
+}
+loadData();
+
+// FORMAT NAME
+function formatName(name){
+  return name.toLowerCase().split(" ").filter(w=>w)
+  .map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(" ");
+}
+
+// FORMAT MOBILE
+function formatMobile(mobile){
+  mobile = mobile.replace(/\D/g,'');
+  if(mobile.startsWith("974")) mobile = mobile.slice(3);
+  if(mobile.length !== 8) return null;
+  return "+974" + mobile;
+}
+
+// DUPLICATE CHECK
+function isDuplicate(name, mobile){
+  return existingData.some(r =>
+    r.Name.toLowerCase().trim() === name.toLowerCase().trim() &&
+    r.Mobile.trim() === mobile.trim()
+  );
+}
+
+// SUBMIT
 document.getElementById("form").addEventListener("submit", async (e)=>{
 e.preventDefault();
 
-const name = document.getElementById("name").value;
-const mobile = document.getElementById("mobile").value;
+let name = formatName(document.getElementById("name").value.trim());
+let mobile = formatMobile(document.getElementById("mobile").value.trim());
 const date = document.getElementById("date").value;
 
 const msg = document.getElementById("msg");
+const btn = document.getElementById("submitBtn");
 
-msg.innerHTML = "⏳ Submitting...";
+// VALIDATION
+if(!mobile){
+  msg.innerHTML = `<div class="error">Invalid Qatar mobile number</div>`;
+  return;
+}
+
+// DUPLICATE CHECK
+if(isDuplicate(name, mobile)){
+  msg.innerHTML = `<div class="error">This person is already registered.</div>`;
+  return;
+}
+
+// DISABLE BUTTON
+btn.disabled = true;
+btn.innerText = "Submitting...";
 
 try{
 const res = await fetch(URL,{
@@ -162,9 +213,18 @@ registrationDate:date
 const data = await res.json();
 
 if(data.status==="success"){
+
+existingData.push({Name:name, Mobile:mobile});
+
+// 📱 AUTO WHATSAPP OPEN
+window.open(`https://wa.me/${mobile.replace('+','')}?text=${encodeURIComponent(
+`Hello ${name}, you are successfully registered for Bible Reading 🙏\nRefNo: ${data.refno}`
+)}`, "_blank");
+
 msg.innerHTML = `
 <div class="success">
 <strong>✅ Successfully Registered</strong><br><br>
+
 RefNo: ${data.refno}<br>
 Name: ${name}<br>
 Mobile: ${mobile}
@@ -172,9 +232,9 @@ Mobile: ${mobile}
 <br><br>
 <canvas id="qr"></canvas><br><br>
 
-<button onclick="printSlip('${data.refno}','${name}','${mobile}')">
-🖨 Print Slip
-</button>
+<button onclick="printSlip('${data.refno}','${name}','${mobile}')">🖨 Print Slip</button>
+<button onclick="resetForm()">🔄 Register New</button>
+<button onclick="exitSystem()">❌ Exit</button>
 </div>
 `;
 
@@ -183,18 +243,39 @@ QRCode.toCanvas(document.getElementById('qr'),
 
 }else{
 msg.innerHTML = `<div class="error">${data.message}</div>`;
+btn.disabled = false;
+btn.innerText = "Register Now";
 }
 
-}catch(err){
-msg.innerHTML = `<div class="error">Connection error. Please try again.</div>`;
+}catch{
+msg.innerHTML = `<div class="error">Connection error. Try again.</div>`;
+btn.disabled = false;
+btn.innerText = "Register Now";
 }
 
 });
 
+// RESET
+function resetForm(){
+document.getElementById("form").reset();
+document.getElementById("msg").innerHTML="";
+document.getElementById("submitBtn").disabled = false;
+document.getElementById("submitBtn").innerText="Register Now";
+setDate();
+}
+
+// EXIT
+function exitSystem(){
+window.open('', '_self');
+window.close();
+window.location.href = "about:blank";
+}
+
+// PRINT
 function printSlip(ref,name,mobile){
 const w = window.open('');
 w.document.write(`
-<h2>Bible Study Registration</h2>
+<h2>Bible Registration</h2>
 <p>RefNo: ${ref}</p>
 <p>Name: ${name}</p>
 <p>Mobile: ${mobile}</p>
