@@ -25,7 +25,9 @@ button { cursor:pointer; background:#7a4c2c; color:white; }
 }
 
 table { width:100%; border-collapse:collapse; margin-top:10px; }
-td,th { padding:10px; border-bottom:1px solid #ddd; }
+td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
+
+#chart { margin-top:20px; }
 
 </style>
 </head>
@@ -36,11 +38,13 @@ td,th { padding:10px; border-bottom:1px solid #ddd; }
 
 <h2>📊 Super Admin Dashboard</h2>
 
+<!-- LOGIN -->
 <div id="login">
 <input type="password" id="pass" placeholder="Password">
 <button onclick="login()">Login</button>
 </div>
 
+<!-- PANEL -->
 <div id="panel" style="display:none;">
 
 <!-- FILTERS -->
@@ -49,7 +53,8 @@ td,th { padding:10px; border-bottom:1px solid #ddd; }
 <input type="text" id="search" placeholder="Search name/mobile">
 
 <button onclick="applyFilter()">Apply Filter</button>
-<button onclick="exportCSV()">Export CSV</button>
+<button onclick="exportCSV()">⬇ Export CSV</button>
+<button onclick="toggleAnalytics()">📊 Show/Hide Analytics</button>
 
 <!-- STATS -->
 <div class="cards">
@@ -84,6 +89,7 @@ const URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gld
 
 let rawData = [];
 let chart;
+let analyticsVisible = true;
 
 // LOGIN
 function login(){
@@ -100,9 +106,19 @@ applyFilter();
 });
 }
 
-// FORMAT DATE
-function formatDate(d){
-return new Date(d).toLocaleString();
+// SAFE REFNO
+function safeRef(ref){
+return (!ref || isNaN(ref)) ? "-" : Number(ref);
+}
+
+// SAFE DATE
+function formatDate(val){
+if(!val) return "-";
+
+let d = new Date(val);
+if(isNaN(d)) return val;
+
+return d.toLocaleString();
 }
 
 // FILTER
@@ -115,10 +131,10 @@ let search = document.getElementById("search").value.toLowerCase();
 let filtered = rawData.filter(r=>{
 
 let matchSearch =
-r.Name.toLowerCase().includes(search) ||
-r.Mobile.includes(search);
+(r.Name || "").toLowerCase().includes(search) ||
+(r.Mobile || "").includes(search);
 
-let date = r.RegistrationDate;
+let date = r.RegistrationDate || "";
 
 let matchDate =
 (!from || date>=from) &&
@@ -140,9 +156,9 @@ tbody.innerHTML="";
 data.forEach(r=>{
 tbody.innerHTML+=`
 <tr>
-<td>${Number(r.RefNo)}</td>
-<td>${r.Name}</td>
-<td>${r.Mobile}</td>
+<td>${safeRef(r.RefNo)}</td>
+<td>${r.Name || "-"}</td>
+<td>${r.Mobile || "-"}</td>
 <td>${formatDate(r.Timestamp)}</td>
 </tr>`;
 });
@@ -155,7 +171,7 @@ let today = new Date().toISOString().split('T')[0];
 let month = today.slice(0,7);
 
 let todayCount = data.filter(r=>r.RegistrationDate===today).length;
-let monthCount = data.filter(r=>r.RegistrationDate.startsWith(month)).length;
+let monthCount = data.filter(r=>(r.RegistrationDate||"").startsWith(month)).length;
 
 document.getElementById("total").innerText = "Total: "+data.length;
 document.getElementById("today").innerText = "Today: "+todayCount;
@@ -165,10 +181,14 @@ document.getElementById("month").innerText = "This Month: "+monthCount;
 // CHART
 function updateChart(data){
 
+if(!analyticsVisible) return;
+
 let counts = {};
 
 data.forEach(r=>{
-counts[r.RegistrationDate] = (counts[r.RegistrationDate]||0)+1;
+let d = r.RegistrationDate;
+if(!d) return;
+counts[d] = (counts[d]||0)+1;
 });
 
 let labels = Object.keys(counts).sort();
@@ -180,32 +200,47 @@ chart = new Chart(document.getElementById("chart"),{
 type:"line",
 data:{
 labels:labels,
-datasets:[{ label:"Registrations", data:values }]
+datasets:[{
+label:"Registrations",
+data:values,
+fill:false,
+tension:0.2
+}]
 }
 });
 }
 
-// EXPORT
+// TOGGLE ANALYTICS
+function toggleAnalytics(){
+analyticsVisible = !analyticsVisible;
+
+document.getElementById("chart").style.display =
+analyticsVisible ? "block" : "none";
+
+}
+
+// EXPORT CSV (EXCEL SAFE)
 function exportCSV(){
 
 let csv = [["RefNo","Name","Mobile","Date"]];
 
 rawData.forEach(r=>{
 csv.push([
-Number(r.RefNo),
-r.Name,
-r.Mobile,
+safeRef(r.RefNo),
+r.Name || "",
+r.Mobile || "",
 formatDate(r.Timestamp)
 ]);
 });
 
 let content = csv.map(e=>e.join(",")).join("\n");
-let blob = new Blob(["\uFEFF"+content]);
 
-let a = document.createElement("a");
-a.href = URL.createObjectURL(blob);
-a.download = "analytics.csv";
-a.click();
+let blob = new Blob(["\uFEFF"+content], { type: "text/csv;charset=utf-8;" });
+
+let link = document.createElement("a");
+link.href = URL.createObjectURL(blob);
+link.download = "bible_participants.csv";
+link.click();
 }
 
 </script>
