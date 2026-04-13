@@ -7,29 +7,57 @@
 
 <style>
 body { font-family: Arial; background:#f5f5f5; padding:20px; }
-.container { max-width:1200px; margin:auto; background:white; padding:20px; border-radius:10px; }
 
-input,button {
-  padding:8px; margin:5px; border-radius:5px; border:1px solid #ccc;
+.container {
+  max-width:1200px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border-radius:10px;
 }
 
-button { cursor:pointer; background:#7a4c2c; color:white; }
+input,button {
+  padding:8px;
+  margin:5px;
+  border-radius:5px;
+  border:1px solid #ccc;
+}
+
+button {
+  cursor:pointer;
+  background:#7a4c2c;
+  color:white;
+}
 
 .cards {
-  display:flex; gap:10px; margin:15px 0;
+  display:flex;
+  gap:10px;
+  margin:15px 0;
 }
 
 .card {
-  flex:1; padding:15px; background:#eee; border-radius:10px;
-  text-align:center; font-weight:bold;
+  flex:1;
+  padding:15px;
+  background:#eee;
+  border-radius:10px;
+  text-align:center;
+  font-weight:bold;
 }
 
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
 
-#chart { margin-top:20px; }
+td,th {
+  padding:10px;
+  border-bottom:1px solid #ddd;
+  text-align:left;
+}
+
+#panel { display:none; }
 </style>
-
 </head>
 
 <body>
@@ -40,44 +68,46 @@ td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 <!-- LOGIN -->
 <div id="login">
-<input type="password" id="pass" placeholder="Password">
-<button onclick="login()">Login</button>
+  <input type="password" id="pass" placeholder="Password">
+  <button onclick="login()">Login</button>
 </div>
 
 <!-- PANEL -->
-<div id="panel" style="display:none;">
+<div id="panel">
 
-<!-- FILTERS -->
-<input type="date" id="fromDate">
-<input type="date" id="toDate">
-<input type="text" id="search" placeholder="Search name/mobile">
+  <!-- FILTERS -->
+  <input type="date" id="fromDate">
+  <input type="date" id="toDate">
+  <input type="text" id="search" placeholder="Search name/mobile">
 
-<button onclick="applyFilter()">Apply Filter</button>
-<button onclick="exportCSV()">⬇ Export CSV</button>
-<button onclick="toggleAnalytics()">📊 Show/Hide Analytics</button>
+  <button onclick="applyFilter()">Apply Filter</button>
+  <button onclick="exportCSV()">Export CSV</button>
+  <button onclick="toggleAnalytics()">Toggle Chart</button>
+  <button onclick="goHome()">Home</button>
 
-<!-- STATS -->
-<div class="cards">
-<div class="card" id="total">Total: 0</div>
-<div class="card" id="today">Today: 0</div>
-<div class="card" id="month">This Month: 0</div>
-</div>
+  <!-- STATS -->
+  <div class="cards">
+    <div class="card" id="total">Total: 0</div>
+    <div class="card" id="today">Today: 0</div>
+    <div class="card" id="month">This Month: 0</div>
+  </div>
 
-<!-- CHART -->
-<canvas id="chart"></canvas>
+  <!-- CHART -->
+  <canvas id="chart"></canvas>
 
-<!-- TABLE -->
-<table>
-<thead>
-<tr>
-<th>RefNo</th>
-<th>Name</th>
-<th>Mobile</th>
-<th>Date</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th>RefNo</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>RegistrationDate</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
 </div>
 
@@ -85,66 +115,48 @@ td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbw-MOos0HaIFGAg6JiArWEj0gldzG4u3NA6b7um6rWN5NxgkLNeoJPJzdwWOpOd1s5_9g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzfwz9wdrTSad8z5CPk_OI1y1_7wlpmyzxJv5aZQAd4sN2EtAKWBxMLExI97FIomeRa/exec";
 
 let rawData = [];
 let filteredData = [];
 let chart;
 let analyticsVisible = true;
 
-// LOGIN
+/* =======================
+   LOGIN (FIXED)
+======================= */
 function login(){
-fetch(API_URL+"?password="+document.getElementById("pass").value)
-.then(r=>r.json())
-.then(data=>{
-if(data.error){ alert("Wrong password"); return; }
 
-document.getElementById("login").style.display="none";
-document.getElementById("panel").style.display="block";
+fetch(API_URL + "?password=" + document.getElementById("pass").value)
+.then(r => r.text())
+.then(text => {
 
-rawData = data;
-applyFilter();
+  let data;
+
+  try {
+    data = JSON.parse(text);
+  } catch(e) {
+    alert("Server Error: " + text);
+    return;
+  }
+
+  if(data.error){
+    alert(data.error);
+    return;
+  }
+
+  rawData = data;
+
+  document.getElementById("login").style.display = "none";
+  document.getElementById("panel").style.display = "block";
+
+  applyFilter();
 });
 }
 
-// 🔥 UNIVERSAL REFNO (FINAL FIX)
-function getRefNo(r, index){
-
-let ref =
-r.RefNo ||
-r.refno ||
-r.REFNO ||
-r["Ref No"] ||
-r["REF NO"] ||
-r["Reference"];
-
-if(!ref || ref === "-"){
-return 26000 + index + 1;
-}
-
-return ref;
-}
-
-// 🔥 UNIVERSAL DATE
-function getDate(r){
-
-let val =
-r.Timestamp ||
-r.timestamp ||
-r.Date ||
-r.date ||
-r.RegistrationDate;
-
-if(!val) return "-";
-
-let d = new Date(val);
-
-if(isNaN(d)) return val;
-
-return d.toLocaleString();
-}
-
-// FILTER
+/* =======================
+   FILTER
+======================= */
 function applyFilter(){
 
 let from = document.getElementById("fromDate").value;
@@ -153,17 +165,17 @@ let search = document.getElementById("search").value.toLowerCase();
 
 filteredData = rawData.filter(r=>{
 
-let matchSearch =
-(r.Name || "").toLowerCase().includes(search) ||
-(r.Mobile || "").includes(search);
+  let matchSearch =
+    (r.Name || "").toLowerCase().includes(search) ||
+    (r.Mobile || "").includes(search);
 
-let date = r.RegistrationDate || "";
+  let date = r.RegistrationDate || "";
 
-let matchDate =
-(!from || date>=from) &&
-(!to || date<=to);
+  let matchDate =
+    (!from || date >= from) &&
+    (!to || date <= to);
 
-return matchSearch && matchDate;
+  return matchSearch && matchDate;
 });
 
 render(filteredData);
@@ -171,37 +183,46 @@ updateStats(filteredData);
 updateChart(filteredData);
 }
 
-// RENDER TABLE
+/* =======================
+   TABLE
+======================= */
 function render(data){
+
 const tbody = document.querySelector("tbody");
-tbody.innerHTML="";
+tbody.innerHTML = "";
 
 data.forEach((r,i)=>{
-tbody.innerHTML+=`
-<tr>
-<td>${getRefNo(r,i)}</td>
-<td>${r.Name || "-"}</td>
-<td>${r.Mobile || "-"}</td>
-<td>${getDate(r)}</td>
-</tr>`;
+  tbody.innerHTML += `
+    <tr>
+      <td>${r.RefNo || (26000+i)}</td>
+      <td>${r.Name || "-"}</td>
+      <td>${r.Mobile || "-"}</td>
+      <td>${r.RegistrationDate || "-"}</td>
+      <td>${r.Timestamp || "-"}</td>
+    </tr>
+  `;
 });
 }
 
-// STATS
+/* =======================
+   STATS
+======================= */
 function updateStats(data){
 
 let today = new Date().toISOString().split('T')[0];
 let month = today.slice(0,7);
 
-let todayCount = data.filter(r=>r.RegistrationDate===today).length;
-let monthCount = data.filter(r=>(r.RegistrationDate||"").startsWith(month)).length;
+let todayCount = data.filter(r => r.RegistrationDate === today).length;
+let monthCount = data.filter(r => (r.RegistrationDate||"").startsWith(month)).length;
 
-document.getElementById("total").innerText = "Total: "+data.length;
-document.getElementById("today").innerText = "Today: "+todayCount;
-document.getElementById("month").innerText = "This Month: "+monthCount;
+document.getElementById("total").innerText = "Total: " + data.length;
+document.getElementById("today").innerText = "Today: " + todayCount;
+document.getElementById("month").innerText = "This Month: " + monthCount;
 }
 
-// CHART
+/* =======================
+   CHART
+======================= */
 function updateChart(data){
 
 if(!analyticsVisible) return;
@@ -209,64 +230,70 @@ if(!analyticsVisible) return;
 let counts = {};
 
 data.forEach(r=>{
-let d = r.RegistrationDate;
-if(!d) return;
-counts[d] = (counts[d]||0)+1;
+  let d = r.RegistrationDate;
+  if(!d) return;
+  counts[d] = (counts[d]||0)+1;
 });
 
 let labels = Object.keys(counts).sort();
-let values = labels.map(k=>counts[k]);
+let values = labels.map(k => counts[k]);
 
 if(chart) chart.destroy();
 
 chart = new Chart(document.getElementById("chart"),{
-type:"line",
-data:{
-labels:labels,
-datasets:[{
-label:"Registrations",
-data:values,
-fill:false,
-tension:0.2
-}]
-}
+  type:"line",
+  data:{
+    labels:labels,
+    datasets:[{
+      label:"Registrations",
+      data:values
+    }]
+  }
 });
 }
 
-// TOGGLE ANALYTICS
-function toggleAnalytics(){
-analyticsVisible = !analyticsVisible;
-document.getElementById("chart").style.display =
-analyticsVisible ? "block" : "none";
-}
-
-// EXPORT CSV (FINAL FIXED)
+/* =======================
+   EXPORT CSV
+======================= */
 function exportCSV(){
 
 let data = filteredData.length ? filteredData : rawData;
 
-let csv = [["RefNo","Name","Mobile","Date"]];
+let csv = [["RefNo","Name","Mobile","RegistrationDate","Timestamp"]];
 
-data.forEach((r,i)=>{
-csv.push([
-getRefNo(r,i),
-r.Name || "",
-r.Mobile || "",
-getDate(r)
-]);
+data.forEach(r=>{
+  csv.push([
+    r.RefNo,
+    r.Name,
+    r.Mobile,
+    r.RegistrationDate,
+    r.Timestamp
+  ]);
 });
 
 let content = csv.map(e=>e.join(",")).join("\n");
 
-let blob = new Blob(["\uFEFF"+content], { type: "text/csv;charset=utf-8;" });
+let blob = new Blob([content], {type:"text/csv"});
+let a = document.createElement("a");
+a.href = URL.createObjectURL(blob);
+a.download = "registrations.csv";
+a.click();
+}
 
-let link = document.createElement("a");
-link.href = window.URL.createObjectURL(blob);
-link.download = "bible_participants.csv";
+/* =======================
+   HOME
+======================= */
+function goHome(){
+window.location.href = "index.html";
+}
 
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
+/* =======================
+   TOGGLE CHART
+======================= */
+function toggleAnalytics(){
+analyticsVisible = !analyticsVisible;
+document.getElementById("chart").style.display =
+analyticsVisible ? "block" : "none";
 }
 
 </script>
