@@ -94,6 +94,29 @@ button:hover {
   color:#7a4c2c;
   font-weight:bold;
 }
+/* HEADER ADD */
+.header {
+  text-align:center;
+  margin-bottom:15px;
+}
+.logo {
+  width:120px;
+  max-width:40%;
+  height:auto;
+  margin-bottom:10px;
+}
+
+.community-name {
+  font-size:16px;
+  font-weight:600;
+  color:#7a4c2c;
+}
+
+@media (max-width:480px){
+  .logo { width:90px; }
+  .community-name { font-size:14px; }
+}
+
 </style>
 </head>
 
@@ -101,7 +124,12 @@ button:hover {
 
 <div class="container">
   <div class="card">
-
+<div class="header">
+  <img src="logo church.jpg" class="logo">
+  <div class="community-name">
+    San Pedro Calungsod Filipino Catholic Community Qatar
+  </div>
+</div>
     <h1>📖 Bible Reading</h1>
     <div class="subtitle">Registration Form</div>
 
@@ -240,7 +268,14 @@ existingData.push({
 
 /* SUCCESS UI */
 msg.innerHTML = `
-<div class="success">
+<div class="success" style="text-align:center;">
+
+<img src="logo spcfcc.jpg" style="width:100px; margin-bottom:10px;">
+
+<div style="font-weight:bold; color:#7a4c2c; margin-bottom:10px;">
+San Pedro Calungsod Filipino Catholic Community Qatar
+</div>
+
 <strong>✅ Successfully Registered</strong><br><br>
 
 RefNo: ${data.refno}<br>
