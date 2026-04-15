@@ -469,29 +469,45 @@ function downloadReceipt(refno, name, mobile){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  // Title
-  doc.setFontSize(14);
-  doc.text("San Pedro Calungsod Filipino Catholic Community Qatar", 105, 20, null, null, "center");
+// Community Name
+doc.setFontSize(13);
+doc.text("San Pedro Calungsod Filipino Catholic Community Qatar", 105, 20, null, null, "center");
 
-  doc.setFontSize(12);
-  doc.text("Registration Receipt", 105, 30, null, null, "center");
+// 🔥 FORCE TEST TEXT
+doc.setFontSize(14);
+doc.setFont(undefined, 'bold');
+doc.text("THE WORD JOURNEY", 105, 30, null, null, "center");
+
+// Reset font
+doc.setFont(undefined, 'normal');
+
+// Registration Title
+doc.setFontSize(11);
+doc.text("Registration Receipt", 105, 40, null, null, "center");
 
   // Line
-  doc.line(20, 35, 190, 35);
+  doc.line(20, 42, 190, 42);
 
   // Content
   doc.setFontSize(11);
 
-  doc.text(`RefNo: ${refno}`, 20, 50);
-  doc.text(`Name: ${name}`, 20, 60);
-  doc.text(`Mobile: ${mobile}`, 20, 70);
+  doc.text(`RefNo: ${refno}`, 20, 60);
+  doc.text(`Name: ${name}`, 20, 75);
+  doc.text(`Mobile: ${mobile}`, 20, 90);
 
   const today = new Date().toLocaleString();
-  doc.text(`Date: ${today}`, 20, 80);
+  doc.text(`Date: ${today}`, 20, 105);
 
   // Footer
-  doc.setFontSize(10);
-  doc.text('"Man shall not live by bread alone..." – Matthew 4:4', 105, 100, null, null, "center");
+  doc.setFontSize(9);
+  doc.text(
+    '"Man shall not live by bread alone, but by every word that proceeds from the mouth of God." – Matthew 4:4',
+    105,
+    125,
+    null,
+    null,
+    "center"
+  );
 
   // Save
   doc.save(`Receipt_${refno}.pdf`);
