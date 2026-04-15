@@ -19,14 +19,13 @@ body {
 }
 .container {
   max-width:500px;
-  margin:20px auto;
+  margin:auto;
   padding:15px;
-  margin-top: 20px;
 
-  min-height:100vh;
+  min-height:100vh;              /* full screen */
   display:flex;
-  align-items:center;     /* 🔥 vertical center */
-  justify-content:center; /* horizontal center */
+  align-items:center;           /* 🔥 vertical center */
+  justify-content:center;       /* horizontal center */
 }
 
 .card {
@@ -38,11 +37,10 @@ body {
   background-size: cover; /* 🔥 best now since no text */
   
   border-radius:20px;
+  padding:25px 
   box-shadow:0 20px 40px rgba(0,0,0,0.25);
-  padding:25px 20px 30px; /* 🔥 more bottom space */
   text-align:center;
   color:white;
-  position: relative;
 }
 .card * {
   position: relative;
@@ -181,6 +179,7 @@ button:hover {
     margin:10px;
     padding:10px;
     margin-top: 20px;
+    align-items:flex-start;   /* 🔥 prevents squishing on small screens */
   }
 
   .card {
