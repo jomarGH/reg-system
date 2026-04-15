@@ -169,6 +169,18 @@ button:hover {
   margin-left:5px;
   width: 34px;   /* slightly smaller */
 }
+.success-logos {
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin-bottom:10px;
+}
+
+.success-logo {
+  width:50px;
+  height:50px;
+  object-fit:contain;
+}
 
 @media (max-width:480px){
   .logo { 
@@ -220,6 +232,10 @@ form {
   }
 .footer {
     padding-bottom:60px;  /* 🔥 fully covers bottom space */
+  }
+.success-logo {
+    width:40px;
+    height:40px;
   }
 }
 
@@ -378,9 +394,12 @@ existingData.push({
 
 /* SUCCESS UI */
 msg.innerHTML = `
-<div class="success" style="text-align:center;">
+<div class="success">
 
-<img src="rblogo spcfcc.png" style="width:100px; margin-bottom:10px;">
+<div class="success-logos">
+  <img src="rblogo church.png" class="success-logo">
+  <img src="rblogo spcfcc.png" class="success-logo">
+</div>
 
 <div style="font-weight:bold; color:#7a4c2c; margin-bottom:10px;">
 San Pedro Calungsod Filipino Catholic Community Qatar
