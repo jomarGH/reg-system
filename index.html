@@ -140,6 +140,7 @@ button:hover {
   justify-content:space-between;
   text-align:center;
   margin-bottom:15px;
+  gap:10px;   /* 🔥 adds breathing space */
 }
 .logo {
   width:45px;
@@ -162,12 +163,12 @@ button:hover {
 }
 .logo.left {
   margin-right:5px;
-  width: 42px;   /* slightly bigger */
+  width: 60px;   /* slightly bigger */
 }
 
 .logo.right {
   margin-left:5px;
-  width: 34px;   /* slightly smaller */
+  width: 50px;   /* slightly smaller */
 }
 .success-logos {
   display:flex;
@@ -182,10 +183,19 @@ button:hover {
   object-fit:contain;
 }
 
+.success-logo {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; transform:scale(0.8); }
+  to { opacity:1; transform:scale(1); }
+}
+
 @media (max-width:480px){
   .logo { 
     width:90px; 
-    height:36px;
+    height:45px;
   }
   .community-name { font-size:12px; }
   .card { padding:20px;  }
@@ -217,11 +227,11 @@ button:hover {
   }
 
 .logo.left {
-    width:38px;
+    width:60px;
   }
 
   .logo.right {
-    width:32px;
+    width:50px;
   }
 
 form {
