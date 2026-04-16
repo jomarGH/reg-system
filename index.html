@@ -372,7 +372,13 @@ if(!mobile){
 
 /* DUPLICATE */
 if(isDuplicate(name, rawMobile)){
-  msg.innerHTML = `<div class="error">This person is already registered.</div>`;
+  msg.innerHTML = `<div class="error">
+
+    <strong>⚠️ This person is already registered.</strong><br><br>
+
+    <button onclick="resetForm()">🔄 Register New</button>
+
+  </div>`;
   return;
 }
 
