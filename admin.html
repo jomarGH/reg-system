@@ -9,11 +9,12 @@
 body { font-family: Arial; background:#f5f5f5; padding:20px; }
 .container { max-width:1200px; margin:auto; background:white; padding:20px; border-radius:10px; }
 
-input,button {
+input,button,select {
   padding:8px; margin:5px; border-radius:5px; border:1px solid #ccc;
 }
 
 button { cursor:pointer; background:#7a4c2c; color:white; }
+button:hover { background:#5a3a1c; }
 
 .cards {
   display:flex; gap:10px; margin:15px 0;
@@ -24,10 +25,72 @@ button { cursor:pointer; background:#7a4c2c; color:white; }
   text-align:center; font-weight:bold;
 }
 
+.card span { 
+  display: block; 
+  font-size: 24px; 
+  margin-top: 8px;
+  color: #7a4c2c;
+}
+
 table { width:100%; border-collapse:collapse; margin-top:10px; }
 td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 #chart { margin-top:20px; }
+
+.filter-group {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  display: block;
+  margin-bottom: 2px;
+  color: #666;
+}
+
+.stats-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #7a4c2c, #5a3a1c);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 120px;
+}
+
+.stat-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.stat-card .number {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.button-group {
+  margin: 15px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.date-range-group {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
 </style>
 
 </head>
@@ -48,20 +111,45 @@ td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 <div id="panel" style="display:none;">
 
 <!-- FILTERS -->
-<input type="date" id="fromDate">
-<input type="date" id="toDate">
-<input type="text" id="search" placeholder="Search name/mobile">
+<div class="filter-group">
+  <label>From Date</label>
+  <input type="date" id="fromDate">
+</div>
+<div class="filter-group">
+  <label>To Date</label>
+  <input type="date" id="toDate">
+</div>
+<div class="filter-group">
+  <label>Search Name/Mobile</label>
+  <input type="text" id="search" placeholder="Search...">
+</div>
 
-<button onclick="applyFilter()">Apply Filter</button>
-<button onclick="exportCSV()">⬇ Export CSV</button>
-<button onclick="toggleAnalytics()">📊 Show/Hide Analytics</button>
-<button onclick="goHome()">🏠 Return Home</button>
+<div class="button-group">
+  <button onclick="applyFilter()">🔍 Apply Filter</button>
+  <button onclick="resetFilter()">🔄 Reset Filter</button>
+  <button onclick="exportCSV()">📥 Export CSV</button>
+  <button onclick="toggleAnalytics()">📊 Show/Hide Analytics</button>
+  <button onclick="goHome()">🏠 Return Home</button>
+</div>
 
-<!-- STATS -->
-<div class="cards">
-<div class="card" id="total">Total: 0</div>
-<div class="card" id="today">Today: 0</div>
-<div class="card" id="month">This Month: 0</div>
+<!-- STATS CARDS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <h3>📋 Total Registered</h3>
+    <p class="number" id="total">0</p>
+  </div>
+  <div class="stat-card">
+    <h3>📅 Today</h3>
+    <p class="number" id="today">0</p>
+  </div>
+  <div class="stat-card">
+    <h3>📆 This Week</h3>
+    <p class="number" id="week">0</p>
+  </div>
+  <div class="stat-card">
+    <h3>🗓️ This Month</h3>
+    <p class="number" id="month">0</p>
+  </div>
 </div>
 
 <!-- CHART -->
@@ -87,7 +175,7 @@ td,th { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbzfwz9wdrTSad8z5CPk_OI1y1_7wlpmyzxJv5aZQAd4sN2EtAKWBxMLExI97FIomeRa/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxVkBkjIfJFoNnN8NpiN-lKZ2xK4n-vrjDHZkFiKQ8BIh9ci65JZCL8RTj1vzr7Ocd36A/exec";
 
 let rawData = [];
 let filteredData = [];
@@ -95,211 +183,296 @@ let chart;
 let analyticsVisible = true;
 
 /* =======================
+   HELPER: GET WEEK RANGE
+======================= */
+function getWeekRange() {
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - dayOfWeek);
+  startOfWeek.setHours(0, 0, 0, 0);
+  
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
+  
+  return {
+    start: startOfWeek.toISOString().split('T')[0],
+    end: endOfWeek.toISOString().split('T')[0]
+  };
+}
+
+/* =======================
+   HELPER: GET MONTH RANGE
+======================= */
+function getMonthRange() {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  
+  return {
+    start: startOfMonth.toISOString().split('T')[0],
+    end: endOfMonth.toISOString().split('T')[0]
+  };
+}
+
+/* =======================
    LOGIN
 ======================= */
 function login(){
-fetch(API_URL + "?password=" + document.getElementById("pass").value)
-.then(r=>r.json())
-.then(data=>{
-if(data.error){ alert("Wrong password"); return; }
-
-document.getElementById("login").style.display="none";
-document.getElementById("panel").style.display="block";
-
-rawData = data;
-applyFilter();
-})
-.catch(()=> alert("Server Error"));
+  fetch(API_URL + "?password=" + document.getElementById("pass").value)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.error){ alert("Wrong password"); return; }
+      
+      document.getElementById("login").style.display="none";
+      document.getElementById("panel").style.display="block";
+      
+      rawData = data;
+      applyFilter();
+    })
+    .catch(()=> alert("Server Error"));
 }
 
 /* =======================
    REFNO
 ======================= */
 function getRefNo(r,i){
-return r.RefNo || (26000 + i);
+  return r.RefNo || (26000 + i);
 }
 
 /* =======================
    DATE FORMAT FIX
 ======================= */
 function formatToISO(dateStr){
-if(!dateStr || dateStr === "-") return "";
-
-let parts = dateStr.split(" ")[0].split("/");
-if(parts.length !== 3) return dateStr;
-
-return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  if(!dateStr || dateStr === "-") return "";
+  
+  let parts = dateStr.split(" ")[0].split("/");
+  if(parts.length !== 3) return dateStr;
+  
+  return `${parts[2]}-${parts[1]}-${parts[0]}`;
 }
 
 function getDateOnly(r){
-if(!r.RegistrationDate) return "-";
-return r.RegistrationDate.split(" ")[0]; // remove time
+  if(!r.RegistrationDate) return "-";
+  return r.RegistrationDate.split(" ")[0];
 }
 
 /* =======================
    TIMESTAMP CLEAN FIX
 ======================= */
 function getTimestamp(r){
+  let val = r.Timestamp;
+  if(!val || val === "-") return "-";
+  
+  if(val.includes("/")) return val;
+  
+  let d = new Date(val);
+  if(isNaN(d)) return val;
+  
+  return d.toLocaleDateString("en-GB") + " " +
+         d.toLocaleTimeString("en-GB");
+}
 
-let val = r.Timestamp;
-if(!val || val === "-") return "-";
+/* =======================
+   CHECK IF DATE IS IN CURRENT WEEK
+======================= */
+function isCurrentWeek(dateStr) {
+  const weekRange = getWeekRange();
+  return dateStr >= weekRange.start && dateStr <= weekRange.end;
+}
 
-// already formatted
-if(val.includes("/")) return val;
+/* =======================
+   CHECK IF DATE IS IN CURRENT MONTH
+======================= */
+function isCurrentMonth(dateStr) {
+  const monthRange = getMonthRange();
+  return dateStr >= monthRange.start && dateStr <= monthRange.end;
+}
 
-let d = new Date(val);
-if(isNaN(d)) return val;
-
-return d.toLocaleDateString("en-GB") + " " +
-       d.toLocaleTimeString("en-GB");
+/* =======================
+   CHECK IF DATE IS TODAY
+======================= */
+function isToday(dateStr) {
+  const today = new Date().toISOString().split('T')[0];
+  return dateStr === today;
 }
 
 /* =======================
    FILTER
 ======================= */
 function applyFilter(){
+  let from = document.getElementById("fromDate").value;
+  let to = document.getElementById("toDate").value;
+  let search = document.getElementById("search").value.toLowerCase();
+  
+  filteredData = rawData.filter(r=>{
+    let name = (r.Name || "").toLowerCase();
+    let mobile = (r.Mobile || "").toString();
+    
+    let matchSearch = name.includes(search) || mobile.includes(search);
+    
+    let isoDate = formatToISO(r.RegistrationDate);
+    
+    let matchDate = true;
+    if (from && isoDate < from) matchDate = false;
+    if (to && isoDate > to) matchDate = false;
+    
+    return matchSearch && matchDate;
+  });
+  
+  render(filteredData);
+  updateStats(filteredData);
+  updateChart(filteredData);
+}
 
-let from = document.getElementById("fromDate").value;
-let to = document.getElementById("toDate").value;
-let search = document.getElementById("search").value.toLowerCase();
+/* =======================
+   RESET FILTER
+======================= */
+function resetFilter(){
+  document.getElementById("fromDate").value = "";
+  document.getElementById("toDate").value = "";
+  document.getElementById("search").value = "";
+  applyFilter();
+}
 
-filteredData = rawData.filter(r=>{
-
-let name = (r.Name || "").toLowerCase();
-let mobile = (r.Mobile || "").toString();
-
-let matchSearch =
-name.includes(search) ||
-mobile.includes(search);
-
-// FIXED DATE FILTER
-let isoDate = formatToISO(r.RegistrationDate);
-
-let matchDate =
-(!from || isoDate >= from) &&
-(!to || isoDate <= to);
-
-return matchSearch && matchDate;
-});
-
-render(filteredData);
-updateStats(filteredData);
-updateChart(filteredData);
+/* =======================
+   UPDATE STATS
+======================= */
+function updateStats(data){
+  const today = new Date().toISOString().split('T')[0];
+  const weekRange = getWeekRange();
+  const monthRange = getMonthRange();
+  
+  let totalCount = data.length;
+  let todayCount = 0;
+  let weekCount = 0;
+  let monthCount = 0;
+  
+  data.forEach(r => {
+    let isoDate = formatToISO(r.RegistrationDate);
+    if (!isoDate) return;
+    
+    if (isoDate === today) todayCount++;
+    if (isoDate >= weekRange.start && isoDate <= weekRange.end) weekCount++;
+    if (isoDate >= monthRange.start && isoDate <= monthRange.end) monthCount++;
+  });
+  
+  document.getElementById("total").innerText = totalCount;
+  document.getElementById("today").innerText = todayCount;
+  document.getElementById("week").innerText = weekCount;
+  document.getElementById("month").innerText = monthCount;
 }
 
 /* =======================
    TABLE RENDER
 ======================= */
 function render(data){
-const tbody = document.querySelector("tbody");
-tbody.innerHTML="";
-
-data.forEach((r,i)=>{
-tbody.innerHTML+=`
-<tr>
-<td>${getRefNo(r,i)}</td>
-<td>${r.Name || "-"}</td>
-<td>${r.Mobile || "-"}</td>
-<td>${getDateOnly(r)}</td>
-<td>${getTimestamp(r)}</td>
-</tr>`;
-});
-}
-
-/* =======================
-   STATS
-======================= */
-function updateStats(data){
-
-let today = new Date().toISOString().split('T')[0];
-let month = today.slice(0,7);
-
-let todayCount = data.filter(r=>formatToISO(r.RegistrationDate)===today).length;
-let monthCount = data.filter(r=>formatToISO(r.RegistrationDate).startsWith(month)).length;
-
-document.getElementById("total").innerText = "Total: "+data.length;
-document.getElementById("today").innerText = "Today: "+todayCount;
-document.getElementById("month").innerText = "This Month: "+monthCount;
+  const tbody = document.querySelector("tbody");
+  tbody.innerHTML="";
+  
+  data.forEach((r,i)=>{
+    tbody.innerHTML+=`
+      <tr>
+        <td>${getRefNo(r,i)}</td>
+        <td>${r.Name || "-"}</td>
+        <td>${r.Mobile || "-"}</td>
+        <td>${getDateOnly(r)}</td>
+        <td>${getTimestamp(r)}</td>
+      </tr>
+    `;
+  });
 }
 
 /* =======================
    CHART
 ======================= */
 function updateChart(data){
-
-if(!analyticsVisible) return;
-
-let counts = {};
-
-data.forEach(r=>{
-let d = formatToISO(r.RegistrationDate);
-if(!d) return;
-counts[d] = (counts[d]||0)+1;
-});
-
-let labels = Object.keys(counts).sort();
-let values = labels.map(k=>counts[k]);
-
-if(chart) chart.destroy();
-
-chart = new Chart(document.getElementById("chart"),{
-type:"line",
-data:{
-labels:labels,
-datasets:[{
-label:"Registrations",
-data:values
-}]
-}
-});
+  if(!analyticsVisible) return;
+  
+  let counts = {};
+  
+  data.forEach(r=>{
+    let d = formatToISO(r.RegistrationDate);
+    if(!d) return;
+    counts[d] = (counts[d]||0)+1;
+  });
+  
+  let labels = Object.keys(counts).sort();
+  let values = labels.map(k=>counts[k]);
+  
+  if(chart) chart.destroy();
+  
+  chart = new Chart(document.getElementById("chart"),{
+    type:"line",
+    data:{
+      labels:labels,
+      datasets:[{
+        label:"Registrations",
+        data:values,
+        borderColor: "#7a4c2c",
+        backgroundColor: "rgba(122, 76, 44, 0.1)",
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        }
+      }
+    }
+  });
 }
 
 /* =======================
    TOGGLE ANALYTICS
 ======================= */
 function toggleAnalytics(){
-analyticsVisible = !analyticsVisible;
-document.getElementById("chart").style.display =
-analyticsVisible ? "block" : "none";
+  analyticsVisible = !analyticsVisible;
+  document.getElementById("chart").style.display = analyticsVisible ? "block" : "none";
+  if (analyticsVisible && filteredData.length) {
+    updateChart(filteredData);
+  }
 }
 
 /* =======================
    EXPORT CSV
 ======================= */
 function exportCSV(){
-
-let data = filteredData.length ? filteredData : rawData;
-
-let csv = [["RefNo","Name","Mobile","RegistrationDate","Timestamp"]];
-
-data.forEach((r,i)=>{
-csv.push([
-getRefNo(r,i),
-r.Name || "",
-r.Mobile || "",
-getDateOnly(r),
-getTimestamp(r)
-]);
-});
-
-let content = csv.map(e=>e.join(",")).join("\n");
-
-let blob = new Blob(["\uFEFF"+content], { type: "text/csv;charset=utf-8;" });
-
-let link = document.createElement("a");
-link.href = window.URL.createObjectURL(blob);
-link.download = "registrations.csv";
-
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
+  let data = filteredData.length ? filteredData : rawData;
+  
+  let csv = [["RefNo","Name","Mobile","RegistrationDate","Timestamp"]];
+  
+  data.forEach((r,i)=>{
+    csv.push([
+      getRefNo(r,i),
+      r.Name || "",
+      r.Mobile || "",
+      getDateOnly(r),
+      getTimestamp(r)
+    ]);
+  });
+  
+  let content = csv.map(e=>e.join(",")).join("\n");
+  
+  let blob = new Blob(["\uFEFF"+content], { type: "text/csv;charset=utf-8;" });
+  
+  let link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.download = "registrations.csv";
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 /* =======================
    HOME
 ======================= */
 function goHome(){
-window.location.href = "index.html";
+  window.location.href = "index.html";
 }
 
 </script>
