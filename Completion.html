@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Completion Page</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing:border-box; }
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 15px;
+  max-width: 420px;
+  margin: auto;
+  background: #f5efe6; /* clean outside */
+}
+.container {
+  max-width:500px;
+  margin:auto;
+  padding:15px;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card {
+  background: url('backgrnd1.png') no-repeat center center;
+  background-size: cover;
+  border-radius: 15px;
+  padding: 15px;
+  color: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.55);
+  z-index:0;
+  border-radius:15px;
+}
+
+.card * {
+  position: relative;
+  z-index: 1;
+}
+
+h1 { font-family:'Playfair Display'; }
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px; /* 🔥 prevents zoom */
+}
+
+/* 🔥 DATE FIX */
+input[type="date"] {
+  color: blue;
+}
+
+input[type="date"]::before {
+  content: attr(placeholder);
+  color: #ddd;
+}
+
+input[type="date"]:focus::before,
+input[type="date"]:valid::before {
+  display: none;
+}
+
+.field-label {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #eee;
+}
+
+/* 🔥 BUTTON */
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(45deg, #b8894a, #d4af37);
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.dashboard {
+  margin-top:20px;
+  font-size:14px;
+}
+
+.dashboard a {
+  text-decoration:none;
+  color:White;
+  font-weight:bold;
+  margin-top:20px;
+  margin-bottom:40px;
+}
+
+
+/* INFO BOX */
+#info {
+  margin-top: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* DIVIDER */
+hr {
+  margin: 15px 0;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* 🔥 HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.logo {
+ height: 85px;
+  max-width: 100px;
+  object-fit: contain;
+}
+
+.title-box {
+  flex: 1;
+  text-align: center;
+}
+
+.community {
+  font-size: 12px;
+  font-weight: bold;
+  color: #f1e6d6;
+}
+
+h1 {
+  margin: 5px 0;
+  font-size: 20px;
+  color: #f1e6d6;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #f1e6d6;
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+body {
+    padding: 10px;
+  }  
+
+.logo {
+    height: 65px;
+  }
+
+ h1 {
+    font-size: 18px;
+  }
+
+
+  input, button {
+    font-size: 16px; /* 🔥 keep to prevent zoom */
+  }
+
+
+}
+
+.success { background:#e8f5e9; color:black; padding:12px; margin-top:10px; border-radius:10px; }
+.error { background:#ffe0e0; padding:12px; margin-top:10px; border-radius:10px; }
+
+.footer { font-size:12px; margin-top:15px; color:#f1e6d6; }
+</style>
+</head>
+
+<body>
+<div class="container">
+<div class="card">
+
+<div class="header">
+
+  <img src="rblogo church.png" class="logo left">
+
+  <div class="title-box">
+    <div class="community">
+      San Pedro Calungsod Filipino Catholic Community Qatar
+    </div>
+ 
+  </div>
+
+  <img src="rblogo spcfcc.png" class="logo right">
+</div>
+
+   <h1>The Word Journey</h1>
+   <div class="subtitle">📖 Bible Progress</div>
+
+<!-- SEARCH -->
+<input id="refno" placeholder="RefNo (e.g. 26001)">
+<input id="mobile" placeholder="Mobile (e.g. 66694789)">
+<input id="name" placeholder="Family (e.g. Juan)">
+<button onclick="search()">🔍 Search</button>
+
+<div id="info"></div>
+<div id="progressBox" style="margin-top:15px; font-weight:bold;"></div>
+
+<hr>
+
+<!-- SAVE -->
+<select id="book" onchange="onBookChange()">
+  <option value="">Select Book</option>
+</select>
+<datalist id="books"></datalist>
+<input id="chapters" oninput="autoComputeVerses()" placeholder="Chapters">
+<input id="verses" placeholder="Verses">
+<label class="field-label">Date</label>
+<input id="date" type="date">
+
+<button onclick="save()">💾 Save Progress</button>
+
+<div class="dashboard">
+<a href="Home.html" target="_blank">🏠 Home</a>
+</div>
+
+
+<div class="footer">
+"Your word is a lamp to my feet." — Psalm 119:105
+</div>
+
+</div>
+</div>
+
+<script>
+const URL = "https://script.google.com/macros/s/AKfycbxCf3rCLl8DpHPxcmggHoXwxR1KVfM6Eo3ZT152btupUdKx7QtNREzHCdQ-deIrbLV29w/exec";
+
+const BOOK_DATA = {
+  "Genesis": { chapters: 50, verses: 1533 },
+  "Exodus": { chapters: 40, verses: 1213 },
+  "Leviticus": { chapters: 27, verses: 859 },
+  "Numbers": { chapters: 36, verses: 1288 },
+  "Deuteronomy": { chapters: 34, verses: 959 },
+  "Joshua": { chapters: 24, verses: 658 },
+  "Judges": { chapters: 21, verses: 618 },
+  "Ruth": { chapters: 4, verses: 85 },
+  "1 Samuel": { chapters: 31, verses: 810 },
+  "2 Samuel": { chapters: 24, verses: 695 },
+  "1 Kings": { chapters: 22, verses: 816 },
+  "2 Kings": { chapters: 25, verses: 719 },
+  "1 Chronicles": { chapters: 29, verses: 942 },
+  "2 Chronicles": { chapters: 36, verses: 822 },
+  "Ezra": { chapters: 10, verses: 280 },
+  "Nehemiah": { chapters: 13, verses: 406 },
+  "Esther": { chapters: 10, verses: 167 },
+  "Job": { chapters: 42, verses: 1070 },
+  "Psalms": { chapters: 150, verses: 2461 },
+  "Proverbs": { chapters: 31, verses: 915 },
+  "Ecclesiastes": { chapters: 12, verses: 222 },
+  "Song of Solomon": { chapters: 8, verses: 117 },
+  "Isaiah": { chapters: 66, verses: 1292 },
+  "Jeremiah": { chapters: 52, verses: 1364 },
+  "Lamentations": { chapters: 5, verses: 154 },
+  "Ezekiel": { chapters: 48, verses: 1273 },
+  "Daniel": { chapters: 12, verses: 357 },
+  "Hosea": { chapters: 14, verses: 197 },
+  "Joel": { chapters: 3, verses: 73 },
+  "Amos": { chapters: 9, verses: 146 },
+  "Obadiah": { chapters: 1, verses: 21 },
+  "Jonah": { chapters: 4, verses: 48 },
+  "Micah": { chapters: 7, verses: 105 },
+  "Nahum": { chapters: 3, verses: 47 },
+  "Habakkuk": { chapters: 3, verses: 56 },
+  "Zephaniah": { chapters: 3, verses: 53 },
+  "Haggai": { chapters: 2, verses: 38 },
+  "Zechariah": { chapters: 14, verses: 211 },
+  "Malachi": { chapters: 4, verses: 55 },
+
+  "Matthew": { chapters: 28, verses: 1071 },
+  "Mark": { chapters: 16, verses: 678 },
+  "Luke": { chapters: 24, verses: 1151 },
+  "John": { chapters: 21, verses: 879 },
+  "Acts": { chapters: 28, verses: 1007 },
+  "Romans": { chapters: 16, verses: 433 },
+  "1 Corinthians": { chapters: 16, verses: 437 },
+  "2 Corinthians": { chapters: 13, verses: 257 },
+  "Galatians": { chapters: 6, verses: 149 },
+  "Ephesians": { chapters: 6, verses: 155 },
+  "Philippians": { chapters: 4, verses: 104 },
+  "Colossians": { chapters: 4, verses: 95 },
+  "1 Thessalonians": { chapters: 5, verses: 89 },
+  "2 Thessalonians": { chapters: 3, verses: 47 },
+  "1 Timothy": { chapters: 6, verses: 113 },
+  "2 Timothy": { chapters: 4, verses: 83 },
+  "Titus": { chapters: 3, verses: 46 },
+  "Philemon": { chapters: 1, verses: 25 },
+  "Hebrews": { chapters: 13, verses: 303 },
+  "James": { chapters: 5, verses: 108 },
+  "1 Peter": { chapters: 5, verses: 105 },
+  "2 Peter": { chapters: 3, verses: 61 },
+  "1 John": { chapters: 5, verses: 105 },
+  "2 John": { chapters: 1, verses: 13 },
+  "3 John": { chapters: 1, verses: 14 },
+  "Jude": { chapters: 1, verses: 25 },
+  "Revelation": { chapters: 22, verses: 404 }
+};
+
+const OLD_TESTAMENT = [
+  "Genesis","Exodus","Leviticus","Numbers","Deuteronomy",
+  "Joshua","Judges","Ruth","1 Samuel","2 Samuel","1 Kings","2 Kings",
+  "1 Chronicles","2 Chronicles","Ezra","Nehemiah","Tobit","Judith",
+  "Esther","1 Maccabees","2 Maccabees","Job","Psalms","Proverbs",
+  "Ecclesiastes","Song of Solomon","Wisdom","Sirach","Isaiah",
+  "Jeremiah","Lamentations","Baruch","Ezekiel","Daniel",
+  "Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum",
+  "Habakkuk","Zephaniah","Haggai","Zechariah","Malachi"
+];
+
+const NEW_TESTAMENT = [
+  "Matthew","Mark","Luke","John","Acts",
+  "Romans","1 Corinthians","2 Corinthians","Galatians",
+  "Ephesians","Philippians","Colossians",
+  "1 Thessalonians","2 Thessalonians",
+  "1 Timothy","2 Timothy","Titus","Philemon",
+  "Hebrews","James","1 Peter","2 Peter",
+  "1 John","2 John","3 John","Jude","Revelation"
+];
+
+const BIBLE_BOOKS = [...OLD_TESTAMENT, ...NEW_TESTAMENT];
+
+/* AUTO POPULATE FUNCTION */
+function populateBooks() {
+  const select = document.getElementById("book");
+
+  BIBLE_BOOKS.forEach(book => {
+    const option = document.createElement("option");
+    option.value = book;
+    option.textContent = book;
+    select.appendChild(option);
+  });
+}
+/* ON BOOK CHANGE */
+function onBookChange() {
+  const book = document.getElementById("book").value;
+  const chaptersInput = document.getElementById("chapters");
+
+  if (!BOOK_DATA[book]) return;
+
+  chaptersInput.value = BOOK_DATA[book].chapters;
+
+  autoComputeVerses();
+}
+
+/* AUTO CALCULATE VERSES */
+function autoComputeVerses() {
+  const book = document.getElementById("book").value;
+  const chapters = parseFloat(document.getElementById("chapters").value);
+
+  if (!BOOK_DATA[book] || !chapters) return;
+
+  const maxChapters = BOOK_DATA[book].chapters;
+  const totalVerses = BOOK_DATA[book].verses;
+
+  if (chapters > maxChapters) {
+    alert(`❌ ${book} only has ${maxChapters} chapters`);
+    document.getElementById("chapters").value = maxChapters;
+    return;
+  }
+
+  const avg = totalVerses / maxChapters;
+  const verses = Math.round(chapters * avg);
+
+  document.getElementById("verses").value = verses;
+}
+
+let current = null;
+
+const bibleBooksData = {
+  "Genesis": {chapters:50, verses:1533},
+  "Exodus": {chapters:40, verses:1213},
+  "Leviticus": {chapters:27, verses:859},
+  "Numbers": {chapters:36, verses:1288},
+  "Deuteronomy": {chapters:34, verses:959},
+  "Joshua": {chapters:24, verses:658},
+  "Judges": {chapters:21, verses:618},
+  "Ruth": {chapters:4, verses:85},
+  "1 Samuel": {chapters:31, verses:810},
+  "2 Samuel": {chapters:24, verses:695},
+  "1 Kings": {chapters:22, verses:816},
+  "2 Kings": {chapters:25, verses:719},
+  "1 Chronicles": {chapters:29, verses:942},
+  "2 Chronicles": {chapters:36, verses:822},
+  "Ezra": {chapters:10, verses:280},
+  "Nehemiah": {chapters:13, verses:406},
+  "Esther": {chapters:10, verses:167},
+  "Job": {chapters:42, verses:1070},
+  "Psalms": {chapters:150, verses:2461},
+  "Proverbs": {chapters:31, verses:915},
+  "Ecclesiastes": {chapters:12, verses:222},
+  "Song of Solomon": {chapters:8, verses:117},
+  "Isaiah": {chapters:66, verses:1292},
+  "Jeremiah": {chapters:52, verses:1364},
+  "Lamentations": {chapters:5, verses:154},
+  "Ezekiel": {chapters:48, verses:1273},
+  "Daniel": {chapters:12, verses:357},
+  "Hosea": {chapters:14, verses:197},
+  "Joel": {chapters:3, verses:73},
+  "Amos": {chapters:9, verses:146},
+  "Obadiah": {chapters:1, verses:21},
+  "Jonah": {chapters:4, verses:48},
+  "Micah": {chapters:7, verses:105},
+  "Nahum": {chapters:3, verses:56},
+  "Habakkuk": {chapters:3, verses:56},
+  "Zephaniah": {chapters:3, verses:53},
+  "Haggai": {chapters:2, verses:38},
+  "Zechariah": {chapters:14, verses:211},
+  "Malachi": {chapters:4, verses:55},
+  "Matthew": {chapters:28, verses:1071},
+  "Mark": {chapters:16, verses:678},
+  "Luke": {chapters:24, verses:1151},
+  "John": {chapters:21, verses:879},
+  "Acts": {chapters:28, verses:1007},
+  "Romans": {chapters:16, verses:433},
+  "1 Corinthians": {chapters:16, verses:437},
+  "2 Corinthians": {chapters:13, verses:257},
+  "Galatians": {chapters:6, verses:149},
+  "Ephesians": {chapters:6, verses:155},
+  "Philippians": {chapters:4, verses:104},
+  "Colossians": {chapters:4, verses:95},
+  "1 Thessalonians": {chapters:5, verses:89},
+  "2 Thessalonians": {chapters:3, verses:47},
+  "1 Timothy": {chapters:6, verses:113},
+  "2 Timothy": {chapters:4, verses:83},
+  "Titus": {chapters:3, verses:46},
+  "Philemon": {chapters:1, verses:25},
+  "Hebrews": {chapters:13, verses:303},
+  "James": {chapters:5, verses:108},
+  "1 Peter": {chapters:5, verses:105},
+  "2 Peter": {chapters:3, verses:61},
+  "1 John": {chapters:5, verses:105},
+  "2 John": {chapters:1, verses:13},
+  "3 John": {chapters:1, verses:14},
+  "Jude": {chapters:1, verses:25},
+  "Revelation": {chapters:22, verses:404}
+};
+
+const datalist = document.getElementById("books");
+
+Object.keys(bibleBooksData).forEach(book => {
+  const option = document.createElement("option");
+  option.value = book;
+  datalist.appendChild(option);
+});
+
+
+
+/* LOAD */
+let users = [];
+let progressData = [];
+
+async function load() {
+  try {
+    const res = await fetch(URL);
+    const text = await res.text();
+
+    console.log("RAW:", text);
+
+    const json = JSON.parse(text);
+
+    // ✅ CASE 1: OLD FORMAT (array)
+    if (Array.isArray(json)) {
+      users = json;
+      progressData = []; // no progress yet
+      console.log("Users:", users.length);
+      console.log("Progress: 0");
+      return;
+    }
+
+    // ✅ CASE 2: NEW FORMAT (object)
+    if (json.status === "success") {
+      users = json.users || [];
+      progressData = json.progress || [];
+
+      console.log("Users:", users.length);
+      console.log("Progress:", progressData.length);
+    } else {
+      console.error("Backend error:", json);
+      alert("❌ Backend error");
+    }
+
+  } catch (err) {
+    console.error("Load failed:", err);
+    alert("❌ Failed to load data");
+  }
+}
+
+/* SEARCH */
+function search() {
+  const ref = document.getElementById("refno").value.trim();
+  const mob = document.getElementById("mobile").value.trim();
+  const name = document.getElementById("name").value.toLowerCase().trim();
+
+  const inputMob = mob.replace(/\D/g,'').slice(-8);
+
+  current = users.find(r => {
+    const rRef = String(r.RefNo || "").trim();
+    const rMob = String(r.Mobile || "").replace(/\D/g,'').slice(-8);
+    const rName = String(r.Name || "").toLowerCase().trim();
+
+    return (
+      (ref && rRef === ref) ||
+      (mob && rMob === inputMob) ||
+      (name && rName.includes(name))
+    );
+  });
+
+  const info = document.getElementById("info");
+
+  if (current) {
+    info.innerHTML = `<div class="success">✅ ${current.Name}</div>`;
+  } else {
+    info.innerHTML = `<div class="error">❌ Not found</div>`;
+  }
+}
+
+function updateUserProgress() {
+  if (!current) return;
+
+  const userRef = current.RefNo;
+
+  // 🔢 count total books finished by this user
+  const userRecords = data.filter(r => String(r.RefNo) === String(userRef));
+
+  const totalBooks = userRecords.length;
+  const totalBibleBooks = 66;
+
+  const percent = ((totalBooks / totalBibleBooks) * 100).toFixed(1);
+
+  document.getElementById("progressBox").innerHTML =
+    `📊 Progress: ${totalBooks}/66 books (${percent}%)`;
+}
+
+function autoComputeVerses() {
+  const book = document.getElementById("book").value;
+  const chaptersInput = document.getElementById("chapters");
+  const versesInput = document.getElementById("verses");
+
+  const chapters = parseFloat(chaptersInput.value);
+
+  if (!BOOK_DATA[book]) return;
+
+  const maxChapters = BOOK_DATA[book].chapters;
+  const totalVerses = BOOK_DATA[book].verses;
+
+  // ❌ Prevent invalid chapters
+  if (chapters > maxChapters) {
+    alert(`❌ ${book} only has ${maxChapters} chapters`);
+    chaptersInput.value = maxChapters;
+    return;
+  }
+
+  if (!chapters || chapters <= 0) return;
+
+  const avg = totalVerses / maxChapters;
+  const computed = Math.round(chapters * avg);
+
+  versesInput.value = computed;
+}
+
+/* SAVE */
+async function save() {
+  if (!current) return alert("Search first");
+
+  const book = document.getElementById("book").value;
+  if (!book) return alert("Enter book");
+
+  const response = await fetch(URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  body: new URLSearchParams({
+    action: "saveProgress",
+    refno: current.RefNo,
+    name: current.Name,
+    mobile: current.Mobile,
+    registrationDate: current.RegistrationDate,
+    book: document.getElementById("book").value,
+    chapters: document.getElementById("chapters").value,
+    verses: document.getElementById("verses").value,
+    date: document.getElementById("date").value
+  })
+});
+
+const text = await response.text();
+console.log("SAVE RAW:", text);
+
+let result;
+
+try {
+  result = JSON.parse(text);
+} catch (err) {
+  alert("❌ Invalid server response");
+  return;
+}
+
+// ✅ HANDLE RESPONSES
+if (result.status === "success") {
+  alert("✅ Saved successfully!");
+
+} else if (result.status === "duplicate") {
+  alert("⚠️ " + result.message);
+
+} else {
+  alert("❌ " + result.message);
+}
+}
+
+load();
+populateBooks();
+</script>
+
+</body>
+</html>
