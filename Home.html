@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Word Journey</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; margin:0; padding:0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg,#f5efe6,#e8dccb);
+}
+
+/* CONTAINER */
+.container {
+  max-width:480px;
+  margin:auto;
+  padding:15px;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* CARD */
+.card {
+  width:100%;
+  background: url("backgrnd1.png") no-repeat center center;
+  background-size: cover;
+  border-radius:24px;
+  padding:22px;
+  position:relative;
+  color:white;
+  box-shadow:0 30px 60px rgba(0,0,0,0.35);
+  overflow:hidden;
+}
+
+.card::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.55));
+}
+
+.card * { position:relative; z-index:1; }
+
+/* HEADER */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo { mix-blend-mode:multiply; }
+.logo.left { width:65px; }
+.logo.right { width:55px; }
+
+.community {
+  text-align:center;
+  font-size:12px;
+  font-weight:600;
+  padding:0 8px;
+}
+
+/* TITLE */
+h1 {
+  font-family:'Playfair Display', serif;
+  font-size:24px;
+  text-align:center;
+  margin:15px 0 5px;
+}
+
+.subtitle {
+  text-align:center;
+  font-size:13px;
+  color:#e6d8c4;
+}
+
+/* GRID */
+.nav-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:25px;
+}
+
+/* NAV CARD */
+.nav-card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  border-radius:18px;
+  padding:18px;
+  text-align:center;
+  cursor:pointer;
+  transition: all 0.25s ease;
+  border:1px solid rgba(255,255,255,0.2);
+}
+
+.nav-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  background: rgba(255,255,255,0.25);
+}
+
+/* ICON (SVG STYLE) */
+.icon {
+  width:26px;
+  height:26px;
+  margin:auto;
+  margin-bottom:8px;
+  fill:white;
+}
+
+/* LABEL */
+.label {
+  font-size:14px;
+  font-weight:600;
+}
+
+/* ADMIN LOCK */
+.admin { background: rgba(0,0,0,0.5); }
+
+/* SOCIAL */
+.socials {
+  margin-top:18px;
+  text-align:center;
+}
+
+.socials a {
+  color:#e6d8c4;
+  margin:0 10px;
+  font-size:13px;
+  text-decoration:none;
+}
+
+.socials a:hover { text-decoration:underline; }
+
+/* EXIT */
+.exit-btn {
+  width:100%;
+  margin-top:15px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#e74c3c;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.exit-btn:hover { background:#c0392b; }
+
+/* FOOTER */
+.footer {
+  margin-top:12px;
+  font-size:12px;
+  text-align:center;
+  color:#e6d8c4;
+}
+
+/* FADE TRANSITION */
+.fade-out {
+  opacity:0;
+  transform:translateY(10px);
+  transition:0.3s;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card" id="app">
+
+    <!-- HEADER -->
+    <div class="header">
+      <img src="rblogo church.png" class="logo left">
+      <div class="community">
+        San Pedro Calungsod Filipino Catholic Community Qatar
+      </div>
+      <img src="rblogo spcfcc.png" class="logo right">
+    </div>
+
+    <!-- TITLE -->
+    <h1>The Word Journey</h1>
+    <div class="subtitle">Grow daily through Scripture</div>
+
+    <!-- NAV -->
+    <div class="nav-grid">
+
+      <div class="nav-card" onclick="navigate('Index.html')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3h18v2H3zm2 4h14v14H5z"/></svg>
+        <div class="label">Registration</div>
+      </div>
+
+      <div class="nav-card" onclick="navigate('Home.html')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 16l-4-4 1.5-1.5L9 13l7.5-7.5L18 7z"/></svg>
+        <div class="label">Completion</div>
+      </div>
+
+      <div class="nav-card" onclick="navigate('progress.html')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 17h2v4H3zm4-6h2v10H7zm4-4h2v14h-2zm4-3h2v17h-2z"/></svg>
+        <div class="label">My Progress</div>
+      </div>
+
+      <div class="nav-card admin" onclick="adminAccess()">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5z"/></svg>
+        <div class="label">Participants</div>
+      </div>
+
+    </div>
+
+    <!-- SOCIAL -->
+    <div class="socials">
+      <a href="#">Facebook</a>
+      <a href="#">YouTube</a>
+      <a href="#">Website</a>
+    </div>
+
+    <!-- EXIT -->
+    <button class="exit-btn" onclick="exitApp()">Exit</button>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      “Man shall not live by bread alone…” – Matthew 4:4
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* SMOOTH NAVIGATION */
+function navigate(page){
+  const app = document.getElementById("app");
+  app.classList.add("fade-out");
+  setTimeout(() => {
+    window.location.href = page;
+  }, 300);
+}
+
+/* ADMIN LOCK (SIMPLE PIN) */
+function adminAccess(){
+  const pin = prompt("Enter admin PIN:");
+  if(pin === "bible2025"){
+    navigate("admin.html");
+  } else if(pin !== null){
+    alert("Access denied");
+  }
+}
+
+/* EXIT */
+function exitApp(){
+  window.open('', '_self');
+  window.close();
+}
+</script>
+
+</body>
+</html>
