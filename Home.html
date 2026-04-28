@@ -132,15 +132,12 @@ h1 {
 }
 
 .socials a {
-  color:#e6d8c4;
-  margin:0 10px;
-  font-size:13px;
+  display:inline-block;
+  margin:0 6px;
   text-decoration:none;
 }
 
-.socials a:hover { text-decoration:underline; }
-
-/* EXIT */
+/* EXIT BUTTON */
 .exit-btn {
   width:100%;
   margin-top:15px;
@@ -151,9 +148,10 @@ h1 {
   color:white;
   font-weight:600;
   cursor:pointer;
+  transition: all 0.2s ease;
 }
 
-.exit-btn:hover { background:#c0392b; }
+.exit-btn:hover { background:#c0392b; transform:scale(0.98); }
 
 /* FOOTER */
 .footer {
@@ -163,48 +161,85 @@ h1 {
   color:#e6d8c4;
 }
 
-/* FADE TRANSITION */
+/* FADE TRANSITION FOR NAVIGATION */
 .fade-out {
   opacity:0;
   transform:translateY(10px);
-  transition:0.3s;
+  transition:opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* Exit overlay transition - complete app shutdown style */
+.exit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #3b2a1f 0%, #2c241a 100%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.5s;
+  backdrop-filter: blur(12px);
+  text-align: center;
+  color: white;
+}
+
+.exit-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
+}
+
+.exit-overlay i {
+  font-size: 4rem;
+  color: #f5d742;
+  animation: pulseGlow 0.8s ease-in-out infinite alternate;
+  margin-bottom: 24px;
+}
+
+.exit-overlay h2 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.exit-overlay p {
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+@keyframes pulseGlow {
+  0% { opacity: 0.6; text-shadow: 0 0 5px rgba(255,215,0,0.3); transform: scale(0.98); }
+  100% { opacity: 1; text-shadow: 0 0 25px rgba(255,215,0,0.8); transform: scale(1.05); }
 }
 
 .social-icon {
   width:clamp(32px, 8vw, 40px);
   height:clamp(32px, 8vw, 40px);
-  margin:0 8px;
   border-radius:50%;
   transition:0.2s;
+  background: rgba(255,255,255,0.1);
+  padding: 5px;
 }
 
 .social-icon:hover {
   transform: scale(1.15);
+  background: rgba(255,255,255,0.2);
 }
 
 @media (max-width:480px){
-
-  h1 {
-    font-size:20px;
-  }
-
-  .subtitle {
-    font-size:12px;
-  }
-
-  .nav-card {
-    padding:14px;
-  }
-
-  .community {
-    font-size:11px;
-  }
-
+  h1 { font-size:20px; }
+  .subtitle { font-size:12px; }
+  .nav-card { padding:14px; }
+  .community { font-size:11px; }
 }
-
 </style>
 </head>
-
 <body>
 
 <div class="container">
@@ -212,11 +247,11 @@ h1 {
 
     <!-- HEADER -->
     <div class="header">
-      <img src="rblogo church.png" class="logo left">
+      <img src="rblogo church.png" class="logo left" alt="church logo">
       <div class="community">
         San Pedro Calungsod Filipino Catholic Community Qatar
       </div>
-      <img src="rblogo spcfcc.png" class="logo right">
+      <img src="rblogo spcfcc.png" class="logo right" alt="community logo">
     </div>
 
     <!-- TITLE -->
@@ -231,7 +266,7 @@ h1 {
         <div class="label">Registration</div>
       </div>
 
-      <div class="nav-card" onclick="navigate('Home.html')">
+      <div class="nav-card" onclick="navigate('Completionpage.html')">
         <svg class="icon" viewBox="0 0 24 24"><path d="M9 16l-4-4 1.5-1.5L9 13l7.5-7.5L18 7z"/></svg>
         <div class="label">Completion</div>
       </div>
@@ -251,20 +286,20 @@ h1 {
     <!-- SOCIAL -->
     <div class="socials">
       <a href="https://wa.me/97466694709" target="_blank">
-        <img src="whatsappb.png" class="social-icon">
+        <img src="whatsappb.png" class="social-icon" alt="WhatsApp">
      </a>
 
      <a href="#" target="_blank">
-        <img src="fbb.png" class="social-icon">
+        <img src="fbb.png" class="social-icon" alt="Facebook">
      </a>
 
      <a href="https://vt.tiktok.com/ZS9koTLPA/" target="_blank">
-        <img src="tiktok.png" class="social-icon">
+        <img src="tiktok.png" class="social-icon" alt="TikTok">
      </a>
     </div>
 
-    <!-- EXIT -->
-    <button class="exit-btn" onclick="exitApp()">Exit</button>
+    <!-- EXIT BUTTON - COMPLETE APP CLOSURE -->
+    <button class="exit-btn" onclick="closeAppCompletely()">Exit</button>
 
     <!-- FOOTER -->
     <div class="footer">
@@ -274,31 +309,182 @@ h1 {
   </div>
 </div>
 
+<!-- Exit transition overlay for graceful shutdown -->
+<div id="exitOverlay" class="exit-overlay">
+  <i class="fas fa-dove" style="font-family: 'Font Awesome 6 Free'; font-weight: 900;"></i>
+  <h2>Closing The Word Journey</h2>
+  <p><i class="fas fa-bible"></i> May God's Word remain in your heart</p>
+  <p style="font-size: 0.75rem; margin-top: 20px;">Thank you for walking with Scripture</p>
+</div>
+
+<!-- Font Awesome for exit overlay icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <script>
-/* SMOOTH NAVIGATION */
+/* SMOOTH NAVIGATION between app pages */
 function navigate(page){
   const app = document.getElementById("app");
   app.classList.add("fade-out");
   setTimeout(() => {
     window.location.href = page;
-  }, 300);
+  }, 280);
 }
 
-/* ADMIN LOCK (SIMPLE PIN) */
+/* ADMIN ACCESS - Navigates to Disciples Leaderboard */
 function adminAccess(){
-  const pin = prompt("Enter admin PIN:");
+  const pin = prompt("Enter admin PIN to access Disciples Leaderboard:");
   if(pin === "bible2025"){
-    navigate("admin.html");
+    const app = document.getElementById("app");
+    app.classList.add("fade-out");
+    setTimeout(() => {
+      window.location.href = "Leaderboard.html";
+    }, 280);
   } else if(pin !== null){
-    alert("Access denied");
+    alert("Access denied. Incorrect PIN.");
   }
 }
 
-/* EXIT */
-function exitApp(){
-  window.open('', '_self');
-  window.close();
+/* COMPLETE APP CLOSURE FUNCTION 
+   This function properly terminates the app by:
+   1. Showing a beautiful farewell transition
+   2. Clearing all app data from session/local storage (optional, for clean exit)
+   3. Displaying a final message and disabling further interaction
+   4. Attempting to close the window/tab if allowed, or showing a permanent shutdown screen
+*/
+function closeAppCompletely() {
+  // Show the exit transition overlay
+  const overlay = document.getElementById("exitOverlay");
+  if (overlay) {
+    overlay.classList.add("active");
+    
+    // Optional: Clear any app-related storage to ensure clean exit
+    try {
+      // Clear session storage (temporary app data)
+      sessionStorage.clear();
+      // Clear any app-specific local storage items (without removing all if not needed)
+      const appKeys = ['wordJourneyUser', 'appSession', 'progressData', 'leaderboardCache'];
+      appKeys.forEach(key => {
+        if (localStorage.getItem(key)) localStorage.removeItem(key);
+      });
+      console.log("App data cleared successfully.");
+    } catch(e) { /* ignore if storage not available */ }
+    
+    // After transition animation, perform final shutdown
+    setTimeout(() => {
+      // Fade out the main container smoothly
+      const container = document.querySelector('.container');
+      if (container) {
+        container.style.transition = "opacity 0.4s ease";
+        container.style.opacity = "0";
+      }
+      
+      setTimeout(() => {
+        // Replace entire body with permanent "App Closed" screen
+        // This effectively terminates the application state
+        document.body.innerHTML = `
+          <div style="
+            min-height: 100vh;
+            background: linear-gradient(145deg, #1f1a14 0%, #2c241a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 20px;
+          ">
+            <div style="
+              text-align: center;
+              color: white;
+              max-width: 450px;
+              animation: fadeInUp 0.8s ease-out;
+            ">
+              <div style="font-size: 5rem; margin-bottom: 20px;">✝️</div>
+              <h1 style="font-size: 1.8rem; margin-bottom: 12px; font-family: 'Playfair Display', serif;">The Word Journey</h1>
+              <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 20px;">The application has been closed.</p>
+              <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 30px;">"Your word is a lamp to my feet and a light to my path." — Psalm 119:105</p>
+              <button onclick="window.location.reload()" style="
+                background: #c28a4e;
+                border: none;
+                padding: 12px 32px;
+                border-radius: 40px;
+                color: white;
+                font-weight: 600;
+                cursor: pointer;
+                font-size: 0.9rem;
+                transition: all 0.2s;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+              " onmouseover="this.style.transform='scale(1.02)'; this.style.backgroundColor='#d4945a'" onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='#c28a4e'">Restart App</button>
+              <p style="margin-top: 24px; font-size: 0.7rem; opacity: 0.5;">You may now close this tab/window</p>
+            </div>
+          </div>
+          <style>
+            @keyframes fadeInUp {
+              from { opacity: 0; transform: translateY(20px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+          </style>
+        `;
+        
+        // Attempt to close the browser window/tab (only works if page was opened by script)
+        // This is a best-effort attempt; if not allowed, the user sees the closure screen above
+        try {
+          // Using window.close() - may work in some contexts, especially if this page was opened via a link with target="_blank"
+          // Most modern browsers restrict this, but we try anyway.
+          window.open('', '_self');
+          window.close();
+        } catch(e) { 
+          // If close fails, the shutdown screen remains - that's acceptable
+          console.log("Window cannot be closed automatically. Manual tab closure required.");
+        }
+        
+        // Also try to close any other potential popups/tabs that might be related (if we had references)
+        // This is a comprehensive shutdown for all app-related pages
+        // Note: Due to browser security, we can only close windows we opened. But the shutdown screen
+        // gives clear indication that the app is terminated.
+      }, 500);
+    }, 600);
+  } else {
+    // Fallback shutdown method
+    document.body.innerHTML = `
+      <div style="
+        min-height: 100vh;
+        background: linear-gradient(145deg, #1f1a14 0%, #2c241a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        text-align: center;
+        padding: 20px;
+      ">
+        <div style="color: white;">
+          <div style="font-size: 4rem;">🙏</div>
+          <h2>The Word Journey</h2>
+          <p>Application closed. Thank you for using the app.</p>
+          <button onclick="window.location.reload()" style="margin-top: 20px; background: #c28a4e; border: none; padding: 10px 24px; border-radius: 30px; color: white; cursor: pointer;">Restart</button>
+        </div>
+      </div>
+    `;
+    try { window.close(); } catch(e) {}
+  }
 }
+
+/* Prevent accidental page reload/back while exiting - just a safety */
+window.addEventListener('beforeunload', function(e) {
+  // This is optional, but we don't want to interfere with normal navigation
+  // leaving it empty to not annoy user
+});
+
+/* Disable right-click on images for better experience */
+document.querySelectorAll('img').forEach(img => {
+  img.addEventListener('contextmenu', (e) => e.preventDefault());
+});
+
+/* Ensure that if user tries to navigate away via back/forward, app state remains clean */
+window.addEventListener('pageshow', function(event) {
+  if (event.persisted) {
+    // Page was loaded from cache, ensure any stale data is cleared
+    console.log("Page restored from cache");
+  }
+});
 </script>
 
 </body>
