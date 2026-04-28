@@ -11,6 +11,40 @@
     body { background: linear-gradient(145deg, #f8f5f0 0%, #e9e2d4 100%); min-height: 100vh; padding: 25px 20px; }
     .container { max-width: 1400px; margin: 0 auto; }
     
+    /* Transition overlay for smooth exit */
+    .exit-transition-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #3b2a1f;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.6s;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .exit-transition-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0s;
+      pointer-events: all;
+    }
+    .exit-transition-overlay i {
+      font-size: 4rem;
+      color: #fff3e0;
+      animation: pulseGlow 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes pulseGlow {
+      0% { opacity: 0.5; text-shadow: 0 0 5px rgba(255,255,200,0.3); transform: scale(0.95); }
+      100% { opacity: 1; text-shadow: 0 0 20px rgba(255,230,170,0.8); transform: scale(1.05); }
+    }
+    
     .header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 28px; background: #ffffffcc; backdrop-filter: blur(4px); padding: 12px 24px; border-radius: 60px; }
     .logo-area h1 { font-size: 1.8rem; color: #3b2a1f; }
     .logo-area h1 i { color: #c28a4e; margin-right: 10px; }
@@ -20,8 +54,8 @@
     .nav-btn { background: #f0e7db; border: none; padding: 10px 26px; border-radius: 40px; font-weight: 600; cursor: pointer; color: #4a3724; transition: all 0.2s; }
     .nav-btn.active { background: #7a4c2c; color: white; }
     .nav-btn i { margin-right: 8px; }
-    .exit-btn { background: #c0392b; color: white; }
-    .exit-btn:hover { background: #a93226; }
+    .exit-btn { background: #c0392b; color: white; transition: transform 0.2s, background 0.2s; }
+    .exit-btn:hover { background: #a93226; transform: scale(0.97); }
     
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
     .modal-content { background: white; border-radius: 48px; padding: 40px; max-width: 400px; width: 90%; text-align: center; }
@@ -92,6 +126,14 @@
       <button class="nav-btn active" id="participantPageBtn"><i class="fas fa-user"></i> My Journey</button>
       <button class="nav-btn" id="adminPageBtn"><i class="fas fa-chart-line"></i> Admin Analytics</button>
       <button class="nav-btn exit-btn" id="exitAppBtn"><i class="fas fa-sign-out-alt"></i> Exit</button>
+    </div>
+  </div>
+
+  <!-- Smooth exit transition overlay -->
+  <div id="exitOverlay" class="exit-transition-overlay">
+    <div style="text-align: center; color: white;">
+      <i class="fas fa-dove"></i>
+      <p style="margin-top: 20px; font-size: 1.2rem; font-weight: 300;">Returning to Home...</p>
     </div>
   </div>
 
@@ -184,7 +226,7 @@
     </div>
     <div id="adminLockedMsg" class="loading" style="display:none;"><i class="fas fa-lock"></i> Admin analytics is locked. Enter password: bible2025</div>
   </div>
-  <footer>✝️ Catholic Bible (73 Books) — Enter your mobile number to view your progress </footer>
+  <footer>✝️ Catholic Bible (73 Books) — Enter your mobile number to view your progress</footer>
 </div>
 
 <script>
@@ -207,10 +249,8 @@
       const users = data.users || [];
       const progress = data.progress || [];
       
-      // Group progress by RefNo
       const userMap = new Map();
       
-      // First, add all users
       users.forEach(user => {
         const refno = String(user.RefNo);
         userMap.set(refno, {
@@ -224,7 +264,6 @@
         });
       });
       
-      // Then add all progress
       progress.forEach(prog => {
         const refno = String(prog.RefNo);
         const book = prog.Book || "";
@@ -232,7 +271,6 @@
         const verses = parseInt(prog.Verses) || 0;
         let completionDate = prog.CompletionDate || "";
         
-        // Format date nicely
         if (completionDate) {
           try {
             const d = new Date(completionDate);
@@ -253,7 +291,6 @@
           user.totalChapters += chapters;
           user.totalVerses += verses;
         } else {
-          // User not in Compage sheet, create entry
           if (!userMap.has(refno)) {
             userMap.set(refno, {
               refno: refno,
@@ -273,7 +310,6 @@
         }
       });
       
-      // Process participants
       enrichedParticipants = Array.from(userMap.values()).map(p => {
         const uniqueBooks = [...new Set(p.booksDetail.map(b => b.book))];
         const percentComplete = Math.round((uniqueBooks.length / TOTAL_BOOKS) * 100);
@@ -305,7 +341,6 @@
     }
   }
 
-  // ========== MOBILE SEARCH ==========
   function searchByMobile() {
     const mobileInput = document.getElementById("mobileSearchInput").value.trim();
     const statusDiv = document.getElementById("searchStatus");
@@ -320,7 +355,6 @@
       return;
     }
     
-    // Find exact mobile match
     const matches = enrichedParticipants.filter(p => p.mobile === mobileInput);
     
     if (matches.length === 0) {
@@ -391,7 +425,6 @@
         row.insertCell(1).innerHTML = `<strong>${b.book}</strong>`;
         row.insertCell(2).innerHTML = `<span class="badge-book">📖 ${b.chapters} chapters</span>`;
         row.insertCell(3).innerHTML = `<span class="badge-book">📜 ${b.verses} verses</span>`;
-        // ✅ NOW DISPLAYING COMPLETION DATE!
         row.insertCell(4).innerHTML = b.date ? `<i class="fas fa-calendar-alt"></i> <strong>${b.date}</strong>` : "<span style='color:#aaa;'>—</span>";
         row.insertCell(5).innerHTML = '<span style="color:#27ae60;"><i class="fas fa-check-circle"></i> Completed</span>';
       });
@@ -406,9 +439,19 @@
     document.getElementById("noResultsMessage").style.display = "none";
   }
   
-  function exitDashboard() {
-    if (confirm("Exit The Word Journey Dashboard?")) {
-      document.body.innerHTML = '<div style="text-align:center; padding:100px;"><i class="fas fa-bible fa-3x" style="color:#7a4c2c;"></i><h2>Thank you for using The Word Journey</h2><p>You may close this browser tab.</p></div>';
+  // === SMOOTH EXIT TO HOME.HTML WITH TRANSITION ===
+  function exitToHome() {
+    // Create and show the gorgeous transition overlay
+    const overlay = document.getElementById("exitOverlay");
+    if (overlay) {
+      overlay.classList.add("active");
+      // Short delay to appreciate the transition effect then navigate
+      setTimeout(() => {
+        window.location.href = "Home.html";
+      }, 500);
+    } else {
+      // fallback immediate navigation if overlay missing
+      window.location.href = "Home.html";
     }
   }
 
@@ -489,8 +532,12 @@
     URL.revokeObjectURL(a.href);
   }
 
-  // Event listeners
-  document.getElementById("exitAppBtn").addEventListener("click", exitDashboard);
+  // === ATTACH EXIT HANDLER WITH SMOOTH TRANSITION ===
+  document.getElementById("exitAppBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    exitToHome();
+  });
+  
   document.getElementById("participantPageBtn").addEventListener("click", () => setActivePage("participant"));
   document.getElementById("adminPageBtn").addEventListener("click", () => setActivePage("admin"));
   document.getElementById("searchMobileBtn").addEventListener("click", searchByMobile);
