@@ -57,6 +57,109 @@
     .exit-btn { background: #c0392b; color: white; transition: transform 0.2s, background 0.2s; }
     .exit-btn:hover { background: #a93226; transform: scale(0.97); }
     
+    /* Leaderboard Link Card - Presentable Style */
+    .leaderboard-link-card {
+      background: linear-gradient(135deg, #7a4c2c 0%, #9b6a42 100%);
+      border-radius: 48px;
+      padding: 20px 32px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      box-shadow: 0 12px 28px rgba(122, 76, 44, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,200,0.3);
+    }
+    .leaderboard-link-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 35px rgba(122, 76, 44, 0.4);
+      background: linear-gradient(135deg, #8b5a38 0%, #ad7a52 100%);
+    }
+    .leaderboard-link-card:active {
+      transform: translateY(1px);
+    }
+    .leaderboard-link-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .leaderboard-icon {
+      background: rgba(255,255,245,0.2);
+      width: 60px;
+      height: 60px;
+      border-radius: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #ffd966;
+    }
+    .leaderboard-text h3 {
+      color: white;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .leaderboard-text p {
+      color: rgba(255,255,240,0.85);
+      font-size: 0.85rem;
+    }
+    .leaderboard-arrow {
+      background: rgba(255,255,245,0.25);
+      padding: 12px 24px;
+      border-radius: 60px;
+      color: white;
+      font-weight: 600;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .leaderboard-link-card:hover .leaderboard-arrow {
+      background: rgba(255,255,245,0.4);
+      gap: 12px;
+    }
+    .leaderboard-arrow i {
+      font-size: 1rem;
+      transition: transform 0.2s;
+    }
+    .leaderboard-link-card:hover .leaderboard-arrow i {
+      transform: translateX(5px);
+    }
+    
+    /* Transition overlay for leaderboard navigation */
+    .page-transition-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #2c241a;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      pointer-events: none;
+    }
+    .page-transition-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: all;
+    }
+    .page-transition-overlay i {
+      font-size: 3.5rem;
+      color: #f5d742;
+      margin-bottom: 20px;
+    }
+    
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
     .modal-content { background: white; border-radius: 48px; padding: 40px; max-width: 400px; width: 90%; text-align: center; }
     .modal-content i { font-size: 3rem; color: #7a4c2c; margin-bottom: 20px; }
@@ -112,7 +215,7 @@
     .loading { text-align: center; padding: 60px; color: #7a5a3e; font-size: 1.2rem; }
     footer { text-align: center; margin-top: 48px; font-size: 0.75rem; color: #7e6a53; }
     .badge-book { background: #7a4c2c20; padding: 4px 12px; border-radius: 40px; font-size: 0.8rem; }
-    @media (max-width: 750px) { .header { flex-direction: column; gap: 12px; } .stat-number { font-size: 1.8rem; } }
+    @media (max-width: 750px) { .header { flex-direction: column; gap: 12px; } .stat-number { font-size: 1.8rem; } .leaderboard-link-left { flex-direction: column; text-align: center; } .leaderboard-link-card { justify-content: center; text-align: center; } }
   </style>
 </head>
 <body>
@@ -129,7 +232,30 @@
     </div>
   </div>
 
-  <!-- Smooth exit transition overlay -->
+  <!-- PRESENTABLE LEADERBOARD LINK CARD -->
+  <div id="leaderboardLinkCard" class="leaderboard-link-card">
+    <div class="leaderboard-link-left">
+      <div class="leaderboard-icon">
+        <i class="fas fa-crown"></i>
+      </div>
+      <div class="leaderboard-text">
+        <h3><i class="fas fa-trophy"></i> Faithful Disciples · Rankings</h3>
+        <p>View weekly, monthly & all-time leaderboard | See who's leading in God's Word</p>
+      </div>
+    </div>
+    <div class="leaderboard-arrow">
+      <span>Visit Leaderboard</span>
+      <i class="fas fa-arrow-right"></i>
+    </div>
+  </div>
+
+  <!-- Page transition overlay for smooth navigation to Leaderboard -->
+  <div id="pageTransitionOverlay" class="page-transition-overlay">
+    <i class="fas fa-chart-line fa-pulse"></i>
+    <p style="color: white; font-size: 1rem;">Loading Disciples Leaderboard...</p>
+  </div>
+
+  <!-- Smooth exit transition overlay for Home -->
   <div id="exitOverlay" class="exit-transition-overlay">
     <div style="text-align: center; color: white;">
       <i class="fas fa-dove"></i>
@@ -222,11 +348,11 @@
         <div class="chart-box"><h3><i class="fas fa-users-viewfinder"></i> Progress Distribution</h3><canvas id="participantActivityChart"></canvas></div>
       </div>
       <div class="section-title"><i class="fas fa-table-list"></i> All Participants</div>
-      <div class="table-wrapper"><table id="adminParticipantsTable"><thead><tr><th>RefNo</th><th>Name</th><th>Mobile</th><th>Books Done</th><th>Chapters</th><th>Verses</th><th>Progress</th></tr></thead><tbody id="adminTableBody"></tbody></table></div>
+      <div class="table-wrapper"><table id="adminParticipantsTable"><thead><tr><th>RefNo</th><th>Name</th><th>Mobile</th><th>Books Done</th><th>Chapters</th><th>Verses</th><th>Progress</th></table></thead><tbody id="adminTableBody"></tbody></table></div>
     </div>
     <div id="adminLockedMsg" class="loading" style="display:none;"><i class="fas fa-lock"></i> Admin analytics is locked. Enter password: bible2025</div>
   </div>
-  <footer>✝️ Catholic Bible (73 Books) — Enter your mobile number to view your progress</footer>
+  <footer>✝️ Catholic Bible (73 Books) — Enter your mobile number to view your progress | <i class="fas fa-trophy"></i> Check Disciples Leaderboard above</footer>
 </div>
 
 <script>
@@ -235,9 +361,22 @@
   const ADMIN_PASSWORD = "bible2025";
   let isAdminUnlocked = false;
   let enrichedParticipants = [];
-  let currentDisplayParticipant = null;
   let bookChart = null, activityChart = null;
   const API_URL = "https://script.google.com/macros/s/AKfycbxCf3rCLl8DpHPxcmggHoXwxR1KVfM6Eo3ZT152btupUdKx7QtNREzHCdQ-deIrbLV29w/exec";
+  const LEADERBOARD_PAGE = "Leaderboard.html"; // File name for the Disciples Leaderboard
+
+  // Smooth navigation to Leaderboard with transition effect
+  function navigateToLeaderboard() {
+    const overlay = document.getElementById("pageTransitionOverlay");
+    if (overlay) {
+      overlay.classList.add("active");
+      setTimeout(() => {
+        window.location.href = LEADERBOARD_PAGE;
+      }, 400);
+    } else {
+      window.location.href = LEADERBOARD_PAGE;
+    }
+  }
 
   async function fetchData() {
     try {
@@ -439,23 +578,18 @@
     document.getElementById("noResultsMessage").style.display = "none";
   }
   
-  // === SMOOTH EXIT TO HOME.HTML WITH TRANSITION ===
   function exitToHome() {
-    // Create and show the gorgeous transition overlay
     const overlay = document.getElementById("exitOverlay");
     if (overlay) {
       overlay.classList.add("active");
-      // Short delay to appreciate the transition effect then navigate
       setTimeout(() => {
         window.location.href = "Home.html";
       }, 500);
     } else {
-      // fallback immediate navigation if overlay missing
       window.location.href = "Home.html";
     }
   }
 
-  // Admin functions
   function showPasswordModal() { document.getElementById("passwordModal").style.display = "flex"; document.getElementById("adminPasswordInput").value = ""; document.getElementById("passwordErrorMsg").style.display = "none"; }
   function hidePasswordModal() { document.getElementById("passwordModal").style.display = "none"; }
   function unlockAdmin() { isAdminUnlocked = true; hidePasswordModal(); document.getElementById("adminContent").style.display = "block"; document.getElementById("adminLockedMsg").style.display = "none"; renderAdminView(); }
@@ -532,12 +666,8 @@
     URL.revokeObjectURL(a.href);
   }
 
-  // === ATTACH EXIT HANDLER WITH SMOOTH TRANSITION ===
-  document.getElementById("exitAppBtn").addEventListener("click", (e) => {
-    e.preventDefault();
-    exitToHome();
-  });
-  
+  // Event Listeners
+  document.getElementById("exitAppBtn").addEventListener("click", (e) => { e.preventDefault(); exitToHome(); });
   document.getElementById("participantPageBtn").addEventListener("click", () => setActivePage("participant"));
   document.getElementById("adminPageBtn").addEventListener("click", () => setActivePage("admin"));
   document.getElementById("searchMobileBtn").addEventListener("click", searchByMobile);
@@ -548,6 +678,12 @@
   document.getElementById("exportAdminCSV")?.addEventListener("click", exportCSV);
   document.getElementById("submitPasswordBtn").addEventListener("click", () => { checkAndUnlock(document.getElementById("adminPasswordInput").value); });
   document.getElementById("adminPasswordInput").addEventListener("keypress", e => { if (e.key === "Enter") checkAndUnlock(e.target.value); });
+  
+  // Leaderboard Link with transition
+  const leaderboardCard = document.getElementById("leaderboardLinkCard");
+  if (leaderboardCard) {
+    leaderboardCard.addEventListener("click", navigateToLeaderboard);
+  }
 
   fetchData();
 </script>
