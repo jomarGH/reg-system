@@ -18,6 +18,7 @@ body {
 /* CONTAINER */
 .container {
   max-width:480px;
+  width:100%;
   margin:auto;
   padding:15px;
   min-height:100vh;
@@ -29,6 +30,7 @@ body {
 /* CARD */
 .card {
   width:100%;
+  max-width:420px;
   background: url("backgrnd1.png") no-repeat center center;
   background-size: cover;
   border-radius:24px;
@@ -83,7 +85,7 @@ h1 {
 /* GRID */
 .nav-grid {
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
   gap:14px;
   margin-top:25px;
 }
@@ -107,8 +109,8 @@ h1 {
 
 /* ICON (SVG STYLE) */
 .icon {
-  width:26px;
-  height:26px;
+  width:clamp(22px, 5vw, 28px);
+  height:clamp(22px, 5vw, 28px);
   margin:auto;
   margin-bottom:8px;
   fill:white;
@@ -167,6 +169,39 @@ h1 {
   transform:translateY(10px);
   transition:0.3s;
 }
+
+.social-icon {
+  width:clamp(32px, 8vw, 40px);
+  height:clamp(32px, 8vw, 40px);
+  margin:0 8px;
+  border-radius:50%;
+  transition:0.2s;
+}
+
+.social-icon:hover {
+  transform: scale(1.15);
+}
+
+@media (max-width:480px){
+
+  h1 {
+    font-size:20px;
+  }
+
+  .subtitle {
+    font-size:12px;
+  }
+
+  .nav-card {
+    padding:14px;
+  }
+
+  .community {
+    font-size:11px;
+  }
+
+}
+
 </style>
 </head>
 
@@ -215,9 +250,17 @@ h1 {
 
     <!-- SOCIAL -->
     <div class="socials">
-      <a href="#">Facebook</a>
-      <a href="#">YouTube</a>
-      <a href="#">Website</a>
+      <a href="https://wa.me/97466694709" target="_blank">
+        <img src="whatsappb.png" class="social-icon">
+     </a>
+
+     <a href="#" target="_blank">
+        <img src="fbb.png" class="social-icon">
+     </a>
+
+     <a href="https://vt.tiktok.com/ZS9koTLPA/" target="_blank">
+        <img src="tiktok.png" class="social-icon">
+     </a>
     </div>
 
     <!-- EXIT -->
