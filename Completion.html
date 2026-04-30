@@ -636,21 +636,10 @@ async function save() {
   }
 }
 
-async function goHome(){
-  try {
-    // call your existing save function
-    await saveProgress();
-
-    // small delay (optional, ensures save completes)
-    setTimeout(() => {
-      window.location.href = "Home.html";
-    }, 500);
-
-  } catch (e) {
-    alert("Save failed. Still going home.");
-    window.location.href = "Home.html";
-  }
+function goHome(){
+  window.location.href = "Home.html";
 }
+
 load();
 populateBooks();
 </script>
