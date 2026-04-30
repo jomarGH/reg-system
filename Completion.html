@@ -235,9 +235,7 @@ body {
 
 <button onclick="save()">💾 Save Progress</button>
 
-<div class="dashboard">
-<a href="Home.html" target="_blank">🏠 Home</a>
-</div>
+<button onclick="goHome()" class="home-btn">🏠 Home</button>
 
 
 <div class="footer">
@@ -583,54 +581,76 @@ function autoComputeVerses() {
 }
 
 /* SAVE */
+
 async function save() {
+
   if (!current) return alert("Search first");
 
-  const book = document.getElementById("book").value;
-  if (!book) return alert("Enter book");
+  const book = document.getElementById("book").value.trim();
+  const chapters = document.getElementById("chapters").value.trim();
+  const verses = document.getElementById("verses").value.trim();
+  const date = document.getElementById("date").value;
+
+  // 🔒 VALIDATION (ALL FIELDS REQUIRED)
+  if (!book || !chapters || !verses || !date) {
+    alert("Please complete all fields before saving");
+    return;
+  }
 
   const response = await fetch(URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded"
-  },
-  body: new URLSearchParams({
-    action: "saveProgress",
-    refno: current.RefNo,
-    name: current.Name,
-    mobile: current.Mobile,
-    registrationDate: current.RegistrationDate,
-    book: document.getElementById("book").value,
-    chapters: document.getElementById("chapters").value,
-    verses: document.getElementById("verses").value,
-    date: document.getElementById("date").value
-  })
-});
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({
+      action: "saveProgress",
+      refno: current.RefNo,
+      name: current.Name,
+      mobile: current.Mobile,
+      registrationDate: current.RegistrationDate,
+      book: book,
+      chapters: chapters,
+      verses: verses,
+      date: date
+    })
+  });
 
-const text = await response.text();
-console.log("SAVE RAW:", text);
+  const text = await response.text();
+  console.log("SAVE RAW:", text);
 
-let result;
+  let result;
 
-try {
-  result = JSON.parse(text);
-} catch (err) {
-  alert("❌ Invalid server response");
-  return;
+  try {
+    result = JSON.parse(text);
+  } catch (err) {
+    alert("❌ Invalid server response");
+    return;
+  }
+
+  if (result.status === "success") {
+    alert("✅ Saved successfully!");
+  } else if (result.status === "duplicate") {
+    alert("⚠️ " + result.message);
+  } else {
+    alert("❌ " + result.message);
+  }
 }
 
-// ✅ HANDLE RESPONSES
-if (result.status === "success") {
-  alert("✅ Saved successfully!");
+async function goHome(){
+  try {
+    // call your existing save function
+    await saveProgress();
 
-} else if (result.status === "duplicate") {
-  alert("⚠️ " + result.message);
+    // small delay (optional, ensures save completes)
+    setTimeout(() => {
+      window.location.href = "Home.html";
+    }, 500);
 
-} else {
-  alert("❌ " + result.message);
+  } catch (e) {
+    alert("Save failed. Still going home.");
+    window.location.href = "Home.html";
+  }
 }
-}
-
 load();
 populateBooks();
 </script>
