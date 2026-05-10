@@ -530,7 +530,8 @@ function search() {
   const info = document.getElementById("info");
 
   if (current) {
-    info.innerHTML = `<div class="success">✅ ${current.Name}</div>`;
+    info.innerHTML = `<div class="success">✅ ${current.Name}</div>
+                      <div class="warning" style="margin-top: 8px;">📖 Select the book completed. </div>`;
   } else {
     info.innerHTML = `<div class="error">❌ Not found</div>`;
   }
