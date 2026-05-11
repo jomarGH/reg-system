@@ -531,7 +531,7 @@ function search() {
 
   if (current) {
     info.innerHTML = `<div class="success">✅ ${current.Name}</div>
-                      <div class="warning" style="margin-top: 8px;">📖 Select the book completed. </div>`;
+                     <div class="warning" style="margin-top: 8px;">📖 Select the book completed. </div>`;
   } else {
     info.innerHTML = `<div class="error">❌ Not found</div>`;
   }
@@ -598,42 +598,59 @@ async function save() {
     return;
   }
 
-  const response = await fetch(URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: new URLSearchParams({
-      action: "saveProgress",
-      refno: current.RefNo,
-      name: current.Name,
-      mobile: current.Mobile,
-      registrationDate: current.RegistrationDate,
-      book: book,
-      chapters: chapters,
-      verses: verses,
-      date: date
-    })
-  });
+  // 📖 CONFIRMATION MESSAGE WITH BOOK NAME
+  const userConfirmed = confirm(`Have you faithfully completed all chapters of the book "${book}"?\n\nChapters read: ${chapters}\n\nClick "OK" to save or "Cancel" to reset.`);
+  
+  if (userConfirmed) {
+    // ✅ Yes - proceed with saving
+    const response = await fetch(URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        action: "saveProgress",
+        refno: current.RefNo,
+        name: current.Name,
+        mobile: current.Mobile,
+        registrationDate: current.RegistrationDate,
+        book: book,
+        chapters: chapters,
+        verses: verses,
+        date: date
+      })
+    });
 
-  const text = await response.text();
-  console.log("SAVE RAW:", text);
+    const text = await response.text();
+    console.log("SAVE RAW:", text);
 
-  let result;
+    let result;
 
-  try {
-    result = JSON.parse(text);
-  } catch (err) {
-    alert("❌ Invalid server response");
-    return;
-  }
+    try {
+      result = JSON.parse(text);
+    } catch (err) {
+      alert("❌ Invalid server response");
+      return;
+    }
 
-  if (result.status === "success") {
-    alert("✅ Saved successfully!");
-  } else if (result.status === "duplicate") {
-    alert("⚠️ " + result.message);
+    if (result.status === "success") {
+      alert(`✅ Successfully saved! You have completed ${chapters} chapters of ${book}.`);
+      // Clear the form after successful save
+      document.getElementById("chapters").value = "";
+      document.getElementById("verses").value = "";
+      document.getElementById("date").value = "";
+    } else if (result.status === "duplicate") {
+      alert("⚠️ " + result.message);
+    } else {
+      alert("❌ " + result.message);
+    }
   } else {
-    alert("❌ " + result.message);
+    // ❌ No - reset the input boxes
+    document.getElementById("chapters").value = "";
+    document.getElementById("verses").value = "";
+    document.getElementById("date").value = "";
+    document.getElementById("book").value = "";
+    alert("Progress has been reset. You can start over.");
   }
 }
 
