@@ -295,6 +295,152 @@ footer {
   font-size: 0.8rem;
 }
 
+/* Video Section Styles - Two Videos */
+.video-section {
+  margin-top: 40px;
+  padding: 25px;
+  background: linear-gradient(135deg, #fef7ed 0%, #fff9f0 100%);
+  border-radius: 28px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.video-section h3 {
+  font-size: 1.5rem;
+  color: #3b2a1f;
+  margin-bottom: 20px;
+  border-left: 5px solid #c28a4e;
+  padding-left: 15px;
+}
+
+.video-section h3 i {
+  color: #c28a4e;
+  margin-right: 10px;
+}
+
+.video-wrapper {
+  margin-bottom: 35px;
+  padding: 20px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.video-wrapper h4 {
+  font-size: 1.2rem;
+  color: #3b2a1f;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f0e2d4;
+}
+
+.video-wrapper h4 i {
+  color: #c28a4e;
+  margin-right: 8px;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.video-container video {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+.video-caption {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #7e6a53;
+  font-style: italic;
+}
+
+.video-caption i {
+  color: #c28a4e;
+  margin-right: 6px;
+}
+
+.video-fallback {
+  background: #f0e7db;
+  padding: 20px;
+  text-align: center;
+  border-radius: 12px;
+  color: #5a3a1c;
+}
+
+.video-fallback a {
+  color: #c28a4e;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.video-fallback a:hover {
+  text-decoration: underline;
+}
+
+.download-all {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9e0d4;
+}
+
+.download-btn {
+  display: inline-block;
+  background: #7a4c2c;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+  background: #9b6a42;
+  transform: translateY(-2px);
+}
+
+.download-btn i {
+  margin-right: 8px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .video-section {
+    padding: 15px;
+  }
+  
+  .video-section h3 {
+    font-size: 1.2rem;
+  }
+  
+  .video-wrapper {
+    padding: 12px;
+  }
+  
+  .video-wrapper h4 {
+    font-size: 1rem;
+  }
+  
+  .download-btn {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+  }
+}
+
 @media (max-width: 800px) {
   .toc-sidebar {
     display: none;
@@ -412,6 +558,57 @@ footer {
           </div>
         </div>
       </div>
+
+<!-- Video Tutorials Section - Two Videos -->
+<div class="video-section">
+  <h3><i class="fas fa-video"></i> Video Tutorials: The steps</h3>
+  
+  <!-- Video 1: Getting Started -->
+  <div class="video-wrapper">
+    <h4><i class="fas fa-play-circle"></i> Tutorial 1: Getting Started & Registration</h4>
+    <div class="video-container">
+      <video id="video1" width="100%" controls playsinline preload="metadata" poster="video1-poster.jpg">
+        <source src="twjStep.mp4" type="video/mp4">
+        <source src="twjStep.webm" type="video/webm">
+        <source src="twjStep.ogv" type="video/ogg">
+        <div class="video-fallback">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>Your browser doesn't support video playback.</p>
+          <a href="twjStep.mp4" download>📥 Download Tutorial 1</a>
+        </div>
+      </video>
+    </div>
+    <p class="video-caption">📌 How to register, login, and navigate The Word Journey</p>
+  </div>
+
+  <!-- Video 2: Recording Bible Progress -->
+  <div class="video-wrapper">
+    <h4><i class="fas fa-book-open"></i> Tutorial 2: Recording Your Bible Progress</h4>
+    <div class="video-container">
+      <video id="video2" width="100%" controls playsinline preload="metadata" poster="video2-poster.jpg">
+        <source src="twjStep.mp4" type="video/mp4">
+        <source src="twjStep.webm" type="video/webm">
+        <source src="twjStep.ogv" type="video/ogg">
+        <div class="video-fallback">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>Your browser doesn't support video playback.</p>
+          <a href="twjStep.mp4" download>📥 Download Tutorial 2</a>
+        </div>
+      </video>
+    </div>
+    <p class="video-caption">📖 Rankings...</p>
+  </div>
+
+  <!-- Download All Videos Button -->
+  <div class="download-all">
+    <a href="twjStep.mp4" download class="download-btn">
+      <i class="fas fa-download"></i> Download Tutorial 1
+    </a>
+    <a href="twjStep.mp4" download class="download-btn">
+      <i class="fas fa-download"></i> Download Tutorial 2
+    </a>
+  </div>
+</div>
 
       <!-- FEATURES -->
       <div id="features" class="info-card">
@@ -538,6 +735,38 @@ footer {
 function goHome() {
   window.location.href = "Home.html";
 }
+
+  // Ensure videos work on all devices, especially iOS
+  document.addEventListener('DOMContentLoaded', function() {
+    // Video 1 - Getting Started
+    const video1 = document.getElementById('video1');
+    if (video1) {
+      video1.setAttribute('playsinline', 'true');
+      video1.setAttribute('controls', 'true');
+      video1.setAttribute('preload', 'metadata');
+      
+      video1.addEventListener('error', function(e) {
+        console.log('Video 1 load error');
+        const fallback = this.parentElement.querySelector('.video-fallback');
+        if (fallback) fallback.style.display = 'block';
+      });
+    }
+    
+    // Video 2 - Recording Progress
+    const video2 = document.getElementById('video2');
+    if (video2) {
+      video2.setAttribute('playsinline', 'true');
+      video2.setAttribute('controls', 'true');
+      video2.setAttribute('preload', 'metadata');
+      
+      video2.addEventListener('error', function(e) {
+        console.log('Video 2 load error');
+        const fallback = this.parentElement.querySelector('.video-fallback');
+        if (fallback) fallback.style.display = 'block';
+      });
+    }
+  });
+
 </script>
 
 </body>
