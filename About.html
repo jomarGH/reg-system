@@ -487,6 +487,7 @@ footer {
         <li><a href="#purpose"><i class="fas fa-bullseye"></i> Purpose</a></li>
         <li><a href="#how-it-works"><i class="fas fa-cogs"></i> How It Works</a></li>
         <li><a href="#user-flow"><i class="fas fa-arrows-alt"></i> User Flow</a></li>
+        <li><a href="#user-flow"><i class="fas fa-arrows-alt"></i> Video Tutorials</a></li>
         <li><a href="#features"><i class="fas fa-star"></i> Features</a></li>
         <li><a href="#book-completion"><i class="fas fa-check-double"></i> Book Completion Logic</a></li>
         <li><a href="#getting-started"><i class="fas fa-rocket"></i> Getting Started</a></li>
@@ -581,14 +582,14 @@ footer {
     <p class="video-caption">📌 How to login,register, and navigate The Word Journey</p>
   </div>
 
-  <!-- Video 2: Recording Bible Progress -->
+  <!-- Video 2: About & Rankings -->
   <div class="video-wrapper">
     <h4><i class="fas fa-book-open"></i> Tutorial 2: About & Rankings</h4>
     <div class="video-container">
       <video id="video2" width="100%" controls playsinline preload="metadata" poster="video2-poster.jpg">
         <source src="twjVid2.mp4" type="video/mp4">
         <source src="twjVid2.webm" type="video/webm">
-        <source src="twjVid2.2ogv" type="video/ogg">
+        <source src="twjVid2.ogv" type="video/ogg">
         <div class="video-fallback">
           <i class="fas fa-exclamation-triangle"></i>
           <p>Your browser doesn't support video playback.</p>
@@ -599,16 +600,38 @@ footer {
     <p class="video-caption">📖 Rankings and more...</p>
   </div>
 
+<!-- Video 3: How to download and install Bible app -->
+  <div class="video-wrapper">
+    <h4><i class="fas fa-chart-line"></i> Tutorial 3:  How to download and install Bible app</h4>
+    <div class="video-container">
+      <video id="video3" width="100%" controls playsinline preload="metadata" poster="video3-poster.jpg">
+        <source src="bible.mp4" type="video/mp4">
+        <source src="bible.webm" type="video/webm">
+        <source src="bible.ogv" type="video/ogg">
+        <div class="video-fallback">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p>Your browser doesn't support video playback.</p>
+          <a href="bible.mp4" download>📥 Download Tutorial 3</a>
+        </div>
+      </video>
+    </div>
+    <p class="video-caption">Bible app on your device </p>
+  </div>
+
   <!-- Download All Videos Button -->
   <div class="download-all">
+    
     <a href="twjStep.mp4" download class="download-btn">
       <i class="fas fa-download"></i> Download Tutorial 1
     </a>
     <a href="twjVid2.mp4" download class="download-btn">
       <i class="fas fa-download"></i> Download Tutorial 2
     </a>
+      <a href="bible.mp4" download class="download-btn">
+       <i class="fas fa-download"></i> Download Tutorial 3
+     </a>
   </div>
-</div>
+  </div>
 
       <!-- FEATURES -->
       <div id="features" class="info-card">
@@ -761,6 +784,20 @@ function goHome() {
       
       video2.addEventListener('error', function(e) {
         console.log('Video 2 load error');
+        const fallback = this.parentElement.querySelector('.video-fallback');
+        if (fallback) fallback.style.display = 'block';
+      });
+    }
+    
+    // Video 3 - Tracking Progress & Leaderboard
+    const video3 = document.getElementById('video3');
+    if (video3) {
+      video3.setAttribute('playsinline', 'true');
+      video3.setAttribute('controls', 'true');
+      video3.setAttribute('preload', 'metadata');
+      
+      video3.addEventListener('error', function(e) {
+        console.log('Video 3 load error');
         const fallback = this.parentElement.querySelector('.video-fallback');
         if (fallback) fallback.style.display = 'block';
       });
