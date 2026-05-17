@@ -417,6 +417,80 @@ footer {
   margin-right: 8px;
 }
 
+/* Resource Links Styles */
+.resource-links {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fef9f0;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.resource-links h5 {
+  font-size: 0.9rem;
+  color: #3b2a1f;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.links-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.resource-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.resource-btn i {
+  font-size: 1rem;
+}
+
+.resource-btn.usccb {
+  background: #2c3e6d;
+  color: white;
+}
+
+.resource-btn.usccb:hover {
+  background: #1a2d4f;
+  transform: translateY(-2px);
+}
+
+.resource-btn.awit {
+  background: #8b5a2b;
+  color: white;
+}
+
+.resource-btn.awit:hover {
+  background: #6b421d;
+  transform: translateY(-2px);
+}
+
+.links-note {
+  font-size: 0.7rem;
+  color: #8e735b;
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+.links-note i {
+  color: #c28a4e;
+  margin-right: 4px;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .video-section {
@@ -448,6 +522,16 @@ footer {
   .about-header h1 { font-size: 1.4rem; }
   .container { padding: 1rem; }
   .section-title { font-size: 1.3rem; }
+
+  .resource-btn {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+  
+  .resource-links h5 {
+    font-size: 0.8rem;
+  }
+
 }
 
 .step-number {
@@ -600,24 +684,37 @@ footer {
     <p class="video-caption">📖 Rankings and more...</p>
   </div>
 
-<!-- Video 3: How to download and install Bible app -->
-  <div class="video-wrapper">
-    <h4><i class="fas fa-chart-line"></i> Tutorial 3:  How to download and install Bible app</h4>
-    <div class="video-container">
-      <video id="video3" width="100%" controls playsinline preload="metadata" poster="video3-poster.jpg">
-        <source src="bible.mp4" type="video/mp4">
-        <source src="bible.webm" type="video/webm">
-        <source src="bible.ogv" type="video/ogg">
-        <div class="video-fallback">
-          <i class="fas fa-exclamation-triangle"></i>
-          <p>Your browser doesn't support video playback.</p>
-          <a href="bible.mp4" download>📥 Download Tutorial 3</a>
-        </div>
-      </video>
-    </div>
-    <p class="video-caption">Bible app on your device </p>
+<!-- Video 3: Where to read -->
+<div class="video-wrapper">
+  <h4><i class="fas fa-chart-line"></i> Tutorial 3: Where to read the Bible</h4>
+  <div class="video-container">
+    <video id="video3" width="100%" controls playsinline preload="metadata" poster="video3-poster.jpg">
+      <source src="sites.mp4" type="video/mp4">
+      <source src="sites.webm" type="video/webm">
+      <source src="sites.ogv" type="video/ogg">
+      <div class="video-fallback">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Your browser doesn't support video playback.</p>
+        <a href="sites.mp4" download>📥 Download Tutorial 3</a>
+      </div>
+    </video>
   </div>
-
+  <p class="video-caption">📖 Read Scripture daily from these trusted Catholic sources</p>
+  
+  <!-- Website Links Section -->
+  <div class="resource-links">
+    <h5><i class="fas fa-globe"></i> Recommended Reading Sites:</h5>
+    <div class="links-container">
+      <a href="https://bible.usccb.org/" target="_blank" rel="noopener noreferrer" class="resource-btn usccb">
+        <i class="fas fa-church"></i> USCCB Bible
+      </a>
+      <a href="https://www.awitatpapuri.com/" target="_blank" rel="noopener noreferrer" class="resource-btn awit">
+        <i class="fas fa-praying-hands"></i> Awit at Papuri
+      </a>
+    </div>
+    <p class="links-note"><i class="fas fa-info-circle"></i> Click any link to open in a new tab. Both are free and mobile-friendly.</p>
+  </div>
+</div>
   <!-- Download All Videos Button -->
   <div class="download-all">
     
@@ -627,7 +724,7 @@ footer {
     <a href="twjVid2.mp4" download class="download-btn">
       <i class="fas fa-download"></i> Download Tutorial 2
     </a>
-      <a href="bible.mp4" download class="download-btn">
+      <a href="sites.mp4" download class="download-btn">
        <i class="fas fa-download"></i> Download Tutorial 3
      </a>
   </div>
