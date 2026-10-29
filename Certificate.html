@@ -591,18 +591,12 @@ button:hover, .action-btn:hover {
         
         // NO BOOKS COMPLETED - REMOVED
         
-        // DISCIPLES REF NO - LEFT SIDE
-        ctx.font = `14px 'Inter', monospace`;
-        ctx.fillStyle = '#000';
-        ctx.textAlign = 'left';
-        const refY = canvas.height * 0.78;
-        ctx.fillText(`DISCIPLES Ref No: ${refno}`, canvas.width * 0.12, refY);
-        
+           
         // DATE ISSUED - BOTTOM LEFT
         ctx.font = `14px 'Inter', sans-serif`;
         ctx.fillStyle = '#000';
         ctx.textAlign = 'left';
-        const dateY = canvas.height * 0.85;
+        const dateY = canvas.height * 0.78;
         ctx.fillText(`DATE ISSUED: ${today}`, canvas.width * 0.12, dateY);
         
         // QR CODE - RIGHT SIDE
