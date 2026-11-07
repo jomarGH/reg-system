@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
 
 <style>
-/* ALL YOUR ORIGINAL STYLES REMAIN THE SAME */
 * { box-sizing: border-box; }
 
 body {
@@ -526,55 +525,19 @@ button:hover, .action-btn:hover {
     statusDiv.innerHTML = `✅ Updated ${currentDisciple.name} to ${newBooks} books (${getMilestoneFromBooks(newBooks).title})`;
   }
 
-  // ==================== QR CODE GENERATION ====================
-  function generateSimpleQRCode(text, size = 120) {
-    return new Promise((resolve, reject) => {
-      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&margin=10`;
-      
-      const qrImg = new Image();
-      qrImg.crossOrigin = "Anonymous";
-      
-      qrImg.onload = function() {
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(qrImg, 0, 0, size, size);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      
-      qrImg.onerror = function() {
-        const canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, size, size);
-        ctx.fillStyle = '#FF0000';
-        ctx.font = '10px Arial';
-        ctx.fillText('QR Error', size/2 - 25, size/2);
-        resolve(canvas.toDataURL('image/png'));
-      };
-      
-      qrImg.src = qrApiUrl;
-    });
-  }
-
-  // ===== UPDATED CERTIFICATE GENERATION - NO BOOKS, SMALLER NAME, REFNO LEFT, DATE BOTTOM, QR RIGHT =====
+  // ===== CERTIFICATE GENERATION - NO QR, DATE LEFT =====
   async function generateCertificateImage(disciple, refno, books) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const today = new Date().toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
       }).toUpperCase();
       
-      const verificationURL = `${window.location.origin}${window.location.pathname}?refno=${refno}`;
-      
       const img = new Image();
       img.crossOrigin = "Anonymous";
       
-      img.onload = async function() {
+      img.onload = function() {
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
         canvas.height = img.height;
@@ -582,51 +545,22 @@ button:hover, .action-btn:hover {
         
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
-        // STUDENT NAME - smaller font (32px instead of 42px)
+        // STUDENT NAME
         ctx.font = `bold 32px 'Playfair Display', 'Times New Roman', serif`;
         ctx.fillStyle = '#2c1810';
         ctx.textAlign = 'center';
         const nameY = canvas.height * 0.44;
         ctx.fillText(disciple.name.toUpperCase(), canvas.width / 2, nameY);
         
-        // NO BOOKS COMPLETED - REMOVED
-        
-           
-        // DATE ISSUED - BOTTOM LEFT
+        // DATE ISSUED - LEFT ALIGNED
         ctx.font = `14px 'Inter', sans-serif`;
         ctx.fillStyle = '#000';
         ctx.textAlign = 'left';
         const dateY = canvas.height * 0.78;
-        ctx.fillText(`DATE ISSUED: ${today}`, canvas.width * 0.12, dateY);
+        const dateX = canvas.width * 0.12;
+        ctx.fillText(`DATE ISSUED: ${today}`, dateX, dateY);
         
-        // QR CODE - RIGHT SIDE
-        try {
-          const qrSize = 110;
-          const qrDataURL = await generateSimpleQRCode(verificationURL, qrSize);
-          const qrImg = new Image();
-          qrImg.crossOrigin = "Anonymous";
-          
-          qrImg.onload = function() {
-            const qrX = canvas.width - 150;
-            const qrY = canvas.height * 0.72;
-            ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
-            
-            ctx.font = `10px 'Inter', sans-serif`;
-            ctx.fillStyle = '#000';
-            ctx.textAlign = 'center';
-            ctx.fillText("Scan to verify", qrX + qrSize/2, qrY - 5);
-            
-            resolve(canvas.toDataURL('image/png'));
-          };
-          
-          qrImg.onerror = function() {
-            resolve(canvas.toDataURL('image/png'));
-          };
-          
-          qrImg.src = qrDataURL;
-        } catch (qrError) {
-          resolve(canvas.toDataURL('image/png'));
-        }
+        resolve(canvas.toDataURL('image/png'));
       };
       
       img.onerror = () => reject(new Error('Failed to load certificate background. Make sure certificate_bg.png is in the same folder.'));
