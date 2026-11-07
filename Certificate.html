@@ -525,7 +525,7 @@ button:hover, .action-btn:hover {
     statusDiv.innerHTML = `✅ Updated ${currentDisciple.name} to ${newBooks} books (${getMilestoneFromBooks(newBooks).title})`;
   }
 
-  // ===== CERTIFICATE GENERATION - NO QR, DATE LEFT =====
+  // ===== CERTIFICATE GENERATION - NO QR, DATE SHIFTED RIGHT =====
   async function generateCertificateImage(disciple, refno, books) {
     return new Promise((resolve, reject) => {
       const today = new Date().toLocaleDateString('en-US', { 
@@ -552,13 +552,15 @@ button:hover, .action-btn:hover {
         const nameY = canvas.height * 0.44;
         ctx.fillText(disciple.name.toUpperCase(), canvas.width / 2, nameY);
         
-        // DATE ISSUED - LEFT ALIGNED
+        // DATE ISSUED - LEFT ALIGNED, SHIFTED FURTHER RIGHT
+        // Base position (12% from left) + 12-character space prefix shifts it right.
         ctx.font = `14px 'Inter', sans-serif`;
         ctx.fillStyle = '#000';
         ctx.textAlign = 'left';
         const dateY = canvas.height * 0.78;
         const dateX = canvas.width * 0.12;
-        ctx.fillText(`DATE ISSUED: ${today}`, dateX, dateY);
+        const datePrefix = '            '; // 12 spaces to shift right
+        ctx.fillText(`${datePrefix}DATE ISSUED: ${today}`, dateX, dateY);
         
         resolve(canvas.toDataURL('image/png'));
       };
